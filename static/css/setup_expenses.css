@@ -1,0 +1,129 @@
+/* Container Styling */
+.container {
+    background-color: #ffffff;
+    padding: 2rem;
+    border-radius: 12px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.05);
+    margin-top: 2rem;
+    transition: all 0.3s ease-in-out;
+}
+
+/* Heading */
+h1 {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #0d6efd;
+    margin-bottom: 1.5rem;
+    position: relative;
+    padding-left: 40px;
+}
+
+h1::before {
+    content: "\f0ae";
+    font-family: "Bootstrap-icons";
+    font-size: 24px;
+    position: absolute;
+    left: 0;
+    top: 0;
+    color: #0d6efd;
+}
+
+/* Label Styling */
+.form-label {
+    font-weight: 600;
+    color: #495057;
+}
+
+/* Input Fields */
+.form-control {
+    border-radius: 8px;
+    border: 1px solid #ced4da;
+    transition: all 0.3s ease-in-out;
+}
+
+.form-control:focus {
+    background-color: bisque;
+    border-color: #0d6efd;
+    box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.15);
+}
+.form-control:active {
+    background-color: #e9ecef;
+    border-color: #0d6efd;
+    box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.15);
+}
+
+/* Buttons */
+.btn-primary {
+    background-color: #0d6efd;
+    border: none;
+    padding: 0.6rem 1.4rem;
+    font-weight: 600;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+.btn-primary:hover {
+    background-color: #084298;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(13, 110, 253, 0.2);
+}
+
+.btn-primary::after {
+    content: "\f1c3";
+    font-family: "Bootstrap-icons";
+    margin-left: 10px;
+}
+
+/* Radio Buttons Group Styling */
+/* Radio Button Styling */
+input[type="radio"] {
+    display: none; /* Hide default radio buttons */
+}
+
+input[type="radio"] + label {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 500;
+    cursor: pointer;
+    color: #495057;
+    padding: 6px 12px;
+    border: 2px solid #ced4da;
+    border-radius: 6px;
+    transition: all 0.3s ease-in-out;
+}
+
+input[type="radio"]:checked + label {
+    background-color: #018027;
+    color: #ffffff;
+    border-color: #096901;
+    box-shadow: 0 4px 10px rgba(13, 110, 253, 0.2);
+}
+
+/* Spacing & Alignment */
+.mb-3 > div {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+
+/* Responsive Touch */
+@media (max-width: 576px) {
+    .container {
+        padding: 1.2rem;
+    }
+
+    h1 {
+        font-size: 1.5rem;
+    }
+}
+
+/* Fancy Input Hover */
+input[type="number"]:hover,
+input[type="text"]:hover {
+    border-color: #0d6efd;
+    box-shadow: 0 0 0 0.1rem rgba(13, 110, 253, 0.1);
+}

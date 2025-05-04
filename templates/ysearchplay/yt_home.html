@@ -1,0 +1,191 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}YSearchPlay - Search YouTube Videos{% endblock %}
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/ysearchplay.css' %}">
+{% endblock %}
+
+{% block extra_head %}
+<meta name="description" content="Watch YouTube videos with YSearchPlay.">
+<style>
+    .iframe-container {
+        width: 100%;
+        max-width: 900px;
+        margin: 0 auto;
+    }
+    
+    #player-section {
+        position: relative;
+        width: 100%;
+        padding-bottom: 56.25%; /* 16:9 Aspect Ratio */
+        height: 0;
+        margin-bottom: 20px;
+    }
+    
+    #youtube-iframe {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        border-radius: 8px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Video Link Container -->
+<div class="search-container">
+    <div class="container">
+        <h1 class="search-title">YSearchPlay</h1>
+        <p class="mb-4">Paste a YouTube video link to watch</p>
+        
+        <div class="iframe-container">
+            <div id="player-section" style="display: none;">
+                <iframe id="youtube-iframe" width="100%" height="500" frameborder="0" allowfullscreen></iframe>
+            </div>
+            
+            <form id="youtube-form" class="search-form">
+                <input type="text" id="youtube-url" class="search-input" placeholder="Paste a YouTube link" required>
+                <button type="submit" class="search-btn">
+                    <i class="fas fa-play"></i> Watch
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+
+
+
+<!-- Sample Videos Section -->
+<section class="section" style="background-color: var(--light-gray);">
+    <div class="container">
+        <h2 class="text-center mb-5">Popular Videos</h2>
+        
+        <div class="videos-grid">
+            <!-- Sample Video 1 -->
+            <div class="card video-card">
+                <div class="video-thumbnail">
+                    <img src="https://images.unsplash.com/photo-1548328928-34db1c5fcc1f" alt="Video Thumbnail">
+                    <span class="video-duration">10:30</span>
+                </div>
+                <div class="video-info">
+                    <h3 class="video-title">How to Build a Web Application with Django</h3>
+                    <p class="video-channel">Programming Tutorials</p>
+                    <p class="video-views">125K views</p>
+                    <button class="btn btn-primary sample-video-btn" data-video-id="dQw4w9WgXcQ">Watch Now</button>
+                </div>
+            </div>
+            
+            <!-- Sample Video 2 -->
+            <div class="card video-card">
+                <div class="video-thumbnail">
+                    <img src="https://images.unsplash.com/photo-1611162616475-46b635cb6868" alt="Video Thumbnail">
+                    <span class="video-duration">7:15</span>
+                </div>
+                <div class="video-info">
+                    <h3 class="video-title">10 Essential CSS Tricks Every Developer Should Know</h3>
+                    <p class="video-channel">CodeMaster</p>
+                    <p class="video-views">78K views</p>
+                    <button class="btn btn-primary sample-video-btn" data-video-id="9bZkp7q19f0">Watch Now</button>
+                </div>
+            </div>
+            
+            <!-- Sample Video 3 -->
+            <div class="card video-card">
+                <div class="video-thumbnail">
+                    <img src="https://images.unsplash.com/photo-1523365280197-f1783db9fe62" alt="Video Thumbnail">
+                    <span class="video-duration">15:42</span>
+                </div>
+                <div class="video-info">
+                    <h3 class="video-title">The Complete Guide to Python for Beginners</h3>
+                    <p class="video-channel">Python Mastery</p>
+                    <p class="video-views">250K views</p>
+                    <button class="btn btn-primary sample-video-btn" data-video-id="CONfxbFgr9s">Watch Now</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Focus on search input when page loads
+        const searchInput = document.querySelector('.search-input');
+        if (searchInput) {
+            setTimeout(() => {
+                searchInput.focus();
+            }, 500);
+        }
+        
+        // Common elements
+        const youtubeIframe = document.getElementById('youtube-iframe');
+        const playerSection = document.getElementById('player-section');
+        
+        // Function to play video by ID
+        function playVideo(videoId) {
+            if (videoId) {
+                // Set iframe source to YouTube embed URL
+                youtubeIframe.src = `https://www.youtube.com/embed/${videoId}`;
+                // Show player section
+                playerSection.style.display = 'block';
+                // Scroll to player
+                playerSection.scrollIntoView({ behavior: 'smooth' });
+            }
+        }
+        
+        // Handle form submission
+        const youtubeForm = document.getElementById('youtube-form');
+        const youtubeUrl = document.getElementById('youtube-url');
+        
+        youtubeForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const url = youtubeUrl.value.trim();
+            if (!url) return;
+            
+            // Extract video ID from URL
+            let videoId = null;
+            
+            // Match pattern: youtube.com/watch?v=VIDEO_ID
+            const regExp1 = /(?:youtube\.com\/watch\?v=)([^&]+)/;
+            // Match pattern: youtu.be/VIDEO_ID
+            const regExp2 = /(?:youtu\.be\/)([^?]+)/;
+            // Match pattern: youtube.com/embed/VIDEO_ID
+            const regExp3 = /(?:youtube\.com\/embed\/)([^?]+)/;
+            
+            const match1 = url.match(regExp1);
+            const match2 = url.match(regExp2);
+            const match3 = url.match(regExp3);
+            
+            if (match1) {
+                videoId = match1[1];
+            } else if (match2) {
+                videoId = match2[1];
+            } else if (match3) {
+                videoId = match3[1];
+            }
+            
+            if (videoId) {
+                playVideo(videoId);
+            } else {
+                alert('Please enter a valid YouTube URL');
+            }
+        });
+        
+        // Handle sample video buttons
+        const sampleButtons = document.querySelectorAll('.sample-video-btn');
+        sampleButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                const videoId = this.getAttribute('data-video-id');
+                playVideo(videoId);
+            });
+        });
+    });
+</script>
+{% endblock %}

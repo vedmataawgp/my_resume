@@ -1,0 +1,80 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Excel to VCF Converter - Mini Projects{% endblock %}
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/mini_projects.css' %}">
+{% endblock %}
+{% block content %}
+<div class="container py-5">
+    <div class="card shadow-lg border-0">
+        <div class="card-header bg-info text-white text-center">
+            <h3><i class="fas fa-file-excel me-2"></i>Excel to VCF Converter</h3>
+        </div>
+        <div class="card-body">
+            <form method="post" enctype="multipart/form-data" class="needs-validation" novalidate>
+                {% csrf_token %}
+                <div class="mb-4">
+                    <label for="excel_file" class="form-label">Upload Excel File:</label>
+                    <input type="file" name="excel_file" id="excel_file" class="form-control" required onchange="loadColumns(this)">
+                    <div class="invalid-feedback">Please upload a valid Excel file.</div>
+                </div>
+
+                <div class="mb-4">
+                    <label for="name_column" class="form-label">Select Name Column:</label>
+                    <select name="name_column" id="name_column" class="form-select" required>
+                        <option value="" disabled selected>Select a column</option>
+                    </select>
+                </div>
+
+                <div class="mb-4">
+                    <label for="phone_column" class="form-label">Select Phone/Contact Column:</label>
+                    <select name="phone_column" id="phone_column" class="form-select" required>
+                        <option value="" disabled selected>Select a column</option>
+                    </select>
+                </div>
+
+                <div class="d-grid">
+                    <button type="submit" class="btn btn-info btn-lg text-white">
+                        <i class="fas fa-file-download me-2"></i>Convert to VCF
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    function loadColumns(input) {
+        const file = input.files[0];
+        if (!file) return;
+
+        const formData = new FormData();
+        formData.append('excel_file', file);
+
+        fetch("{% url 'mini_projects:excel_to_vcf' %}", {
+            method: 'POST',
+            body: formData,
+        })
+        .then(response => response.json())
+        .then(data => {
+            const nameColumnSelect = document.getElementById('name_column');
+            const phoneColumnSelect = document.getElementById('phone_column');
+
+            // Clear existing options
+            nameColumnSelect.innerHTML = '<option value="" disabled selected>Select a column</option>';
+            phoneColumnSelect.innerHTML = '<option value="" disabled selected>Select a column</option>';
+
+            // Populate dropdowns with column names
+            data.columns.forEach(column => {
+                const option = document.createElement('option');
+                option.value = column;
+                option.textContent = column;
+
+                nameColumnSelect.appendChild(option.cloneNode(true));
+                phoneColumnSelect.appendChild(option);
+            });
+        })
+        .catch(error => console.error('Error loading columns:', error));
+    }
+</script>
+{% endblock %}

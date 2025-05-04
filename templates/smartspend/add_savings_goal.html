@@ -1,0 +1,152 @@
+{% extends 'base.html' %}
+
+{% block title %}
+{% if edit_mode %}Edit{% else %}Add{% endif %} Savings Goal - SmartSpend
+{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8 col-lg-6">
+        <div class="card shadow">
+            <div class="card-header bg-primary text-white">
+                <h4 class="mb-0">
+                    <i class="fas fa-piggy-bank me-2"></i>
+                    {% if edit_mode %}Edit{% else %}Create New{% endif %} Savings Goal
+                </h4>
+            </div>
+            <div class="card-body">
+                <form method="post">
+                    {% csrf_token %}
+                    
+                    <div class="mb-3">
+                        <label for="id_title" class="form-label">Goal Title</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="fas fa-tag"></i></span>
+                            <input type="text" name="title" id="id_title" class="form-control" value="{{ form.title.value|default:'' }}" placeholder="What are you saving for?" required>
+                        </div>
+                        {% if form.title.errors %}
+                            <small class="text-danger">{{ form.title.errors }}</small>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="id_target_amount" class="form-label">Target Amount (₹)</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="fas fa-rupee-sign"></i></span>
+                            <input type="number" name="target_amount" step="0.01" min="0.01" id="id_target_amount" class="form-control" value="{{ form.target_amount.value|default:'' }}" required>
+                        </div>
+                        {% if form.target_amount.errors %}
+                            <small class="text-danger">{{ form.target_amount.errors }}</small>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="id_current_amount" class="form-label">Current Amount (₹)</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="fas fa-rupee-sign"></i></span>
+                            <input type="number" name="current_amount" step="0.01" min="0" id="id_current_amount" class="form-control" value="{{ form.current_amount.value|default:'0.00' }}">
+                        </div>
+                        {% if form.current_amount.errors %}
+                            <small class="text-danger">{{ form.current_amount.errors }}</small>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="id_target_date" class="form-label">Target Date</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="fas fa-calendar"></i></span>
+                            <input type="date" name="target_date" id="id_target_date" class="form-control" value="{% if form.target_date.value %}{{ form.target_date.value|date:'Y-m-d' }}{% endif %}" required>
+                        </div>
+                        {% if form.target_date.errors %}
+                            <small class="text-danger">{{ form.target_date.errors }}</small>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Savings Calculation -->
+                    <div class="card bg-light mb-3">
+                        <div class="card-body">
+                            <h6 class="card-title"><i class="fas fa-calculator me-2"></i>Savings Calculator</h6>
+                            <div id="savings-calculator">
+                                <div id="calculation-result" class="text-center">
+                                    <p class="mb-1">To reach your goal, you need to save:</p>
+                                    <h5 class="text-primary" id="required-savings">₹0.00 per month</h5>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="d-flex justify-content-between">
+                        {% if edit_mode %}
+                            <a href="{% url 'smartspend:savings_goals' %}" class="btn btn-outline-secondary">Cancel</a>
+                            <button type="submit" class="btn btn-primary">Update Goal</button>
+                        {% else %}
+                            <a href="{% url 'smartspend:savings_goals' %}" class="btn btn-outline-secondary">Cancel</a>
+                            <button type="submit" class="btn btn-primary">Create Goal</button>
+                        {% endif %}
+                    </div>
+                </form>
+            </div>
+        </div>
+        
+        {% if edit_mode %}
+        <div class="card mt-4 shadow-sm border-danger">
+            <div class="card-body text-center">
+                <h5 class="text-danger mb-3">Delete this savings goal?</h5>
+                <a href="{% url 'smartspend:delete_savings_goal' goal.id %}" class="btn btn-danger" onclick="return confirm('Are you sure you want to delete this savings goal?')">
+                    <i class="fas fa-trash-alt me-1"></i> Delete Goal
+                </a>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Get form elements
+        const targetAmountInput = document.getElementById('id_target_amount');
+        const currentAmountInput = document.getElementById('id_current_amount');
+        const targetDateInput = document.getElementById('id_target_date');
+        const requiredSavings = document.getElementById('required-savings');
+        
+        // Calculate savings required
+        function calculateSavings() {
+            const targetAmount = parseFloat(targetAmountInput.value) || 0;
+            const currentAmount = parseFloat(currentAmountInput.value) || 0;
+            const targetDate = new Date(targetDateInput.value);
+            const today = new Date();
+            
+            if (isNaN(targetDate.getTime())) {
+                requiredSavings.textContent = '₹0.00 per month';
+                return;
+            }
+            
+            // Calculate months between today and target date
+            const monthsDiff = (targetDate.getFullYear() - today.getFullYear()) * 12 + 
+                              (targetDate.getMonth() - today.getMonth());
+            
+            if (monthsDiff <= 0) {
+                requiredSavings.textContent = 'Target date must be in the future';
+                return;
+            }
+            
+            const amountNeeded = targetAmount - currentAmount;
+            const monthlySavings = amountNeeded / monthsDiff;
+            
+            requiredSavings.textContent = '₹' + monthlySavings.toFixed(2) + ' per month';
+        }
+        
+        // Add event listeners
+        targetAmountInput.addEventListener('input', calculateSavings);
+        currentAmountInput.addEventListener('input', calculateSavings);
+        targetDateInput.addEventListener('input', calculateSavings);
+        
+        // Calculate on page load
+        if (targetAmountInput.value && targetDateInput.value) {
+            calculateSavings();
+        }
+    });
+</script>
+{% endblock %}

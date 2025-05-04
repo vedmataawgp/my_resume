@@ -1,0 +1,68 @@
+
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Listen to YouTube Audio{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <header class="pb-3 mb-4 border-bottom">
+        <h1>YouTube Audio Stream</h1>
+        <nav class="mt-3">
+            <ul class="nav nav-tabs">
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'youtube_media_downloader:index' %}">Home</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'youtube_media_downloader:video' %}">Video Download</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link active" href="{% url 'youtube_media_downloader:audio' %}">Audio Stream</a>
+                </li>
+            </ul>
+        </nav>
+    </header>
+
+    {% if messages %}
+    <div class="messages">
+        {% for message in messages %}
+        <div class="alert alert-{% if message.tags == 'error' %}danger{% else %}{{ message.tags }}{% endif %} alert-dismissible fade show">
+            {{ message|safe }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card shadow">
+                <div class="card-header">
+                    <h2 class="h4 mb-0">Listen to YouTube Audio</h2>
+                </div>
+                <div class="card-body">
+                    <form method="POST" id="audioForm">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label for="video_url" class="form-label">YouTube Video URL</label>
+                            <div class="input-group">
+                                <input type="url" class="form-control" id="video_url" name="video_url" placeholder="https://www.youtube.com/watch?v=..." required>
+                                <button class="btn btn-primary" type="submit">Start Listening</button>
+                            </div>
+                        </div>
+                    </form>
+
+                    {% if audio_url %}
+                    <div class="mt-4">
+                        <audio controls autoplay class="w-100">
+                            <source src="{{ audio_url }}" type="audio/mp3">
+                            Your browser does not support the audio element.
+                        </audio>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

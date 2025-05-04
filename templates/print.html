@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Print - Divy Mohan Singh</title>
+    <style>
+        /* General Styles */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background: #fff;
+            color: #333;
+        }
+
+        /* A4 Page Size */
+        @page {
+            size: A4;
+            margin: 20mm;
+        }
+
+        /* Container */
+        .container {
+            width: 100%;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* Header Section */
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .header h1 {
+            font-size: 2rem;
+            color: #4A148C;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 1rem;
+            color: #555;
+        }
+
+        /* Section Titles */
+        .section-title {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #4A148C;
+            margin-top: 30px;
+            margin-bottom: 10px;
+            border-bottom: 2px solid #4A148C;
+            padding-bottom: 5px;
+        }
+
+        /* Content Cards */
+        .card {
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 15px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .card h5 {
+            font-size: 1.2rem;
+            color: #6A1B9A;
+            margin-bottom: 10px;
+        }
+
+        .card p {
+            font-size: 0.9rem;
+            color: #555;
+        }
+
+        /* Footer */
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            font-size: 0.8rem;
+            color: #777;
+        }
+
+        /* Print-Specific Styles */
+        @media print {
+            body {
+                margin: 0;
+                padding: 0;
+            }
+
+            .container {
+                padding: 0;
+            }
+
+            .footer {
+                page-break-after: always;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header Section -->
+        <div class="header">
+            <h1>Divy Mohan Singh</h1>
+            <p>Aspiring Full Stack Python Developer | Electronics Student at IIT Madras</p>
+        </div>
+
+        <!-- Live Websites Section -->
+        <div>
+            <h2 class="section-title">Running Websites</h2>
+            <div class="card">
+                <h5>Neem Karoli Travellers</h5>
+                <p>Travel website built using Django and Bootstrap.</p>
+            </div>
+            <div class="card">
+                <h5>Mukti Foundation</h5>
+                <p>A foundation website developed with Django and responsive design.</p>
+            </div>
+            <div class="card">
+                <h5>Vedmata Web Designing</h5>
+                <p>Modern and responsive website design services using Django.</p>
+            </div>
+        </div>
+
+        <!-- Resume & Tools Section -->
+        <div>
+            <h2 class="section-title">Resume & Productivity Tools</h2>
+            <div class="card">
+                <h5>Resume Analyzer</h5>
+                <p>Analyze resumes using Python and Django.</p>
+            </div>
+            <div class="card">
+                <h5>PDF Tools</h5>
+                <p>Merge, split, and compress PDFs using PyPDF2.</p>
+            </div>
+            <div class="card">
+                <h5>YouTube Downloader</h5>
+                <p>Download videos using yt-dlp and Django.</p>
+            </div>
+        </div>
+
+        <!-- Smart Apps Section -->
+        <div>
+            <h2 class="section-title">Smart Apps</h2>
+            <div class="card">
+                <h5>SmartSpend AI</h5>
+                <p>Expense tracker built with Django and Bootstrap.</p>
+            </div>
+            <div class="card">
+                <h5>YouTube without Ad</h5>
+                <p>Search and play YouTube videos using YouTube API.</p>
+            </div>
+        </div>
+
+        <!-- Mini Projects Section -->
+        <div>
+            <h2 class="section-title">Mini Projects</h2>
+            <div class="card">
+                <h5>QR Code Generator</h5>
+                <p>Generate QR codes using Python and Django.</p>
+            </div>
+            <div class="card">
+                <h5>Email Validation</h5>
+                <p>Validate emails using pandas and regex.</p>
+            </div>
+            <div class="card">
+                <h5>Excel to VCF</h5>
+                <p>Convert Excel contacts to VCF format using pandas.</p>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="footer">
+            &copy; 2025 Divy Mohan Singh. All Rights Reserved.
+        </div>
+    </div>
+</body>
+</html>

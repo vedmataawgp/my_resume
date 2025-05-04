@@ -1,0 +1,84 @@
+{% extends 'base.html' %}
+{% load static %}
+
+
+{% block title %}Your History - YSearchPlay{% endblock %}
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/ysearchplay.css' %}">
+{% endblock %}
+{% block extra_head %}
+
+<meta name="description" content="View your search and watch history on YSearchPlay.">
+{% endblock %}
+
+{% block content %}
+<!-- History Header -->
+<div class="search-container" style="padding: 40px 0;">
+    <div class="container">
+        <h1 class="search-title">Your History</h1>
+        <p>Track your search and watch history</p>
+    </div>
+</div>
+
+<!-- History Section -->
+<section class="section">
+    <div class="container">
+        <div class="history-container">
+            <!-- Search History -->
+            <div class="history-section">
+                <h2 class="section-title">Search History</h2>
+                
+                {% if search_history %}
+                    {% for search in search_history %}
+                    <div class="history-item">
+                        <h3 class="history-title">
+                            <a href="{% url 'ysearchplay:results' query=search.query %}">{{ search.query }}</a>
+                        </h3>
+                        <p class="history-meta">
+                            <i class="fas fa-clock"></i> {{ search.timestamp|date:"F j, Y, g:i a" }}
+                        </p>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="text-center py-4">
+                        <i class="fas fa-search fa-3x mb-3" style="color: var(--dark-gray);"></i>
+                        <p>No search history found.</p>
+                        <a href="{% url 'ysearchplay:home' %}" class="btn btn-primary mt-2">Start Searching</a>
+                    </div>
+                {% endif %}
+            </div>
+            
+            <!-- Video History -->
+            <div class="history-section">
+                <h2 class="section-title">Watch History</h2>
+                
+                {% if video_history %}
+                    {% for video in video_history %}
+                    <div class="history-item">
+                        <h3 class="history-title">
+                            <a href="{% url 'ysearchplay:play' video_id=video.video_id %}">{{ video.video_title }}</a>
+                        </h3>
+                        <p class="history-meta">
+                            <i class="fas fa-clock"></i> {{ video.viewed_at|date:"F j, Y, g:i a" }}
+                        </p>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="text-center py-4">
+                        <i class="fas fa-play-circle fa-3x mb-3" style="color: var(--dark-gray);"></i>
+                        <p>No watch history found.</p>
+                        <a href="{% url 'ysearchplay:home' %}" class="btn btn-primary mt-2">Watch Videos</a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+        
+        <!-- Clear History (Could be implemented with AJAX/form submission if needed) -->
+        <div class="text-center mt-4">
+            <a href="{% url 'ysearchplay:home' %}" class="btn btn-primary">
+                <i class="fas fa-search"></i> Search Again
+            </a>
+        </div>
+    </div>
+</section>
+{% endblock %}

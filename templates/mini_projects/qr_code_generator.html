@@ -1,0 +1,32 @@
+<!-- filepath: e:\Divy\Resume\my_resume\templates\mini_projects\qr_code_generator.html -->
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}QR Code Generator - Mini Projects{% endblock %}
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/mini_projects.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="card shadow-lg border-0">
+        <div class="card-header bg-dark text-white text-center">
+            <h3><i class="fas fa-qrcode me-2"></i>QR Code Generator</h3>
+        </div>
+        <div class="card-body">
+            <form method="post" class="needs-validation" novalidate>
+                {% csrf_token %}
+                <div class="mb-4">
+                    <label for="data" class="form-label">Enter Data/URL for QR Code:</label>
+                    <input type="text" name="data" id="data" class="form-control" placeholder="Enter text or URL" required>
+                    <div class="invalid-feedback">Please provide valid data or URL.</div>
+                </div>
+                <div class="d-grid">
+                    <button type="submit" class="btn btn-primary btn-lg">
+                        <i class="fas fa-qrcode me-2"></i>Generate QR Code
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

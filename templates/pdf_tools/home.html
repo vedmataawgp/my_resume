@@ -1,0 +1,291 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-12 text-center mb-4">
+        <h1 class="display-4">PDFMate - Advanced PDF Toolkit</h1>
+        <p class="lead">All the PDF tools you need in one place</p>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Basic Tool Cards -->
+    <div class="col-md-4 mb-4">
+        <div class="card h-100">
+            <div class="card-body text-center">
+                <i class="fas fa-object-group fa-3x text-primary mb-3"></i>
+                <h3 class="card-title">Merge PDFs</h3>
+                <p class="card-text">Combine multiple PDF files into one document.</p>
+                <a href="{% url 'pdf_tools:merge' %}" class="btn btn-primary mt-3">Get Started</a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4 mb-4">
+        <div class="card h-100">
+            <div class="card-body text-center">
+                <i class="fas fa-cut fa-3x text-primary mb-3"></i>
+                <h3 class="card-title">Split PDF</h3>
+                <p class="card-text">Extract specific pages or split into multiple files.</p>
+                <a href="{% url 'pdf_tools:split' %}" class="btn btn-primary mt-3">Get Started</a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4 mb-4">
+        <div class="card h-100">
+            <div class="card-body text-center">
+                <i class="fas fa-compress-alt fa-3x text-primary mb-3"></i>
+                <h3 class="card-title">Compress PDF</h3>
+                <p class="card-text">Reduce the file size of your PDF documents.</p>
+                <a href="{% url 'pdf_tools:compress' %}" class="btn btn-primary mt-3">Get Started</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4 mb-5">
+    <div class="col-md-12 text-center">
+        <h2 class="mb-4">Advanced Features</h2>
+    </div>
+    
+    <!-- Advanced Tool Cards -->
+    <div class="col-md-4 mb-4">
+        <div class="card h-100 border-info">
+            <div class="card-body text-center">
+                <i class="fas fa-images fa-3x text-info mb-3"></i>
+                <h3 class="card-title">PDF to Images</h3>
+                <p class="card-text">Convert PDF pages to high-quality JPG or PNG images.</p>
+                <a href="{% url 'pdf_tools:pdf_to_image' %}" class="btn btn-info mt-3">Convert Now</a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4 mb-4">
+        <div class="card h-100 border-success">
+            <div class="card-body text-center">
+                <i class="fas fa-file-image fa-3x text-success mb-3"></i>
+                <h3 class="card-title">Images to PDF</h3>
+                <p class="card-text">Create a PDF document from multiple image files.</p>
+                <a href="{% url 'pdf_tools:image_to_pdf' %}" class="btn btn-success mt-3">Convert Now</a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4 mb-4">
+        <div class="card h-100 border-warning">
+            <div class="card-body text-center">
+                <i class="fas fa-sort fa-3x text-warning mb-3"></i>
+                <h3 class="card-title">Reorder Pages</h3>
+                <p class="card-text">Rearrange PDF pages using visual drag and drop.</p>
+                <a href="{% url 'pdf_tools:reorder_pdf' %}" class="btn btn-warning mt-3">Reorder Now</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h4 class="mb-0">Quick Upload</h4>
+            </div>
+            <div class="card-body">
+                <div class="drop-area" id="dropArea">
+                    <div class="drop-message">
+                        <i class="fas fa-cloud-upload-alt fa-3x mb-3"></i>
+                        <h4>Drag & Drop PDF Files Here</h4>
+                        <p>or</p>
+                        <label for="fileInput" class="btn btn-outline-primary">Browse Files</label>
+                        <input type="file" id="fileInput" class="file-input" multiple accept=".pdf" style="display: none;">
+                    </div>
+                </div>
+                
+                <div id="uploadedFiles" class="row mt-4" style="display: none;">
+                    <div class="col-12">
+                        <h5>Uploaded Files</h5>
+                        <ul id="fileList" class="list-group mb-3"></ul>
+                        
+                        <div class="btn-group" role="group">
+                            <button id="mergeBtn" class="btn btn-success">Merge Files</button>
+                            <button id="resetBtn" class="btn btn-danger">Reset</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Show welcome modal on first visit
+    document.addEventListener('DOMContentLoaded', function() {
+        if (!localStorage.getItem('welcomeModalShown')) {
+            var welcomeModal = new bootstrap.Modal(document.getElementById('welcomeModal'));
+            welcomeModal.show();
+            localStorage.setItem('welcomeModalShown', 'true');
+            
+            // Auto-close after 5 seconds
+            setTimeout(function() {
+                welcomeModal.hide();
+            }, 5000);
+        }
+        
+        // Quick upload functionality
+        const dropArea = document.getElementById('dropArea');
+        const fileInput = document.getElementById('fileInput');
+        const fileList = document.getElementById('fileList');
+        const uploadedFiles = document.getElementById('uploadedFiles');
+        const mergeBtn = document.getElementById('mergeBtn');
+        const resetBtn = document.getElementById('resetBtn');
+        
+        let files = [];
+        
+        // Prevent default behaviors
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+            dropArea.addEventListener(eventName, preventDefaults, false);
+        });
+        
+        function preventDefaults(e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+        
+        // Highlight drop area when item is dragged over it
+        ['dragenter', 'dragover'].forEach(eventName => {
+            dropArea.addEventListener(eventName, highlight, false);
+        });
+        
+        ['dragleave', 'drop'].forEach(eventName => {
+            dropArea.addEventListener(eventName, unhighlight, false);
+        });
+        
+        function highlight() {
+            dropArea.classList.add('highlight');
+        }
+        
+        function unhighlight() {
+            dropArea.classList.remove('highlight');
+        }
+        
+        // Handle dropped files
+        dropArea.addEventListener('drop', handleDrop, false);
+        fileInput.addEventListener('change', handleFiles, false);
+        
+        function handleDrop(e) {
+            const dt = e.dataTransfer;
+            const newFiles = [...dt.files];
+            handleFileList(newFiles);
+        }
+        
+        function handleFiles(e) {
+            const newFiles = [...e.target.files];
+            handleFileList(newFiles);
+        }
+        
+        function handleFileList(newFiles) {
+            // Filter for PDFs
+            const pdfFiles = newFiles.filter(file => file.type === 'application/pdf');
+            
+            if (pdfFiles.length === 0) {
+                alert('Please upload PDF files only.');
+                return;
+            }
+            
+            files = [...files, ...pdfFiles];
+            updateFileList();
+            uploadedFiles.style.display = 'block';
+        }
+        
+        function updateFileList() {
+            fileList.innerHTML = '';
+            
+            files.forEach((file, index) => {
+                const li = document.createElement('li');
+                li.className = 'list-group-item d-flex justify-content-between align-items-center';
+                li.innerHTML = `
+                    <span><i class="fas fa-file-pdf text-danger me-2"></i>${file.name} (${formatFileSize(file.size)})</span>
+                    <button class="btn btn-sm btn-outline-danger remove-btn" data-index="${index}">
+                        <i class="fas fa-times"></i>
+                    </button>
+                `;
+                fileList.appendChild(li);
+            });
+            
+            // Add event listeners to remove buttons
+            document.querySelectorAll('.remove-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const index = parseInt(this.getAttribute('data-index'));
+                    files.splice(index, 1);
+                    updateFileList();
+                    
+                    if (files.length === 0) {
+                        uploadedFiles.style.display = 'none';
+                    }
+                });
+            });
+        }
+        
+        function formatFileSize(bytes) {
+            if (bytes < 1024) return bytes + ' bytes';
+            else if (bytes < 1048576) return (bytes / 1024).toFixed(1) + ' KB';
+            else return (bytes / 1048576).toFixed(1) + ' MB';
+        }
+        
+        // Handle merge button click
+        mergeBtn.addEventListener('click', function() {
+            if (files.length < 2) {
+                alert('Please upload at least two PDF files to merge.');
+                return;
+            }
+            
+            // Create form data
+            const formData = new FormData();
+            files.forEach(file => {
+                formData.append('files', file);
+            });
+            
+            // Submit to merge endpoint
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = '{% url "pdf_tools:merge" %}';
+            form.enctype = 'multipart/form-data';
+            
+            // Add CSRF token
+            const csrfInput = document.createElement('input');
+            csrfInput.type = 'hidden';
+            csrfInput.name = 'csrfmiddlewaretoken';
+            csrfInput.value = '{{ csrf_token }}';
+            form.appendChild(csrfInput);
+            
+            // Add files
+            files.forEach((file, index) => {
+                const input = document.createElement('input');
+                input.type = 'file';
+                input.name = 'files';
+                input.style.display = 'none';
+                
+                // Create a DataTransfer object and add the file
+                const dataTransfer = new DataTransfer();
+                dataTransfer.items.add(file);
+                input.files = dataTransfer.files;
+                
+                form.appendChild(input);
+            });
+            
+            // Append to body and submit
+            document.body.appendChild(form);
+            form.submit();
+        });
+        
+        // Handle reset button click
+        resetBtn.addEventListener('click', function() {
+            files = [];
+            updateFileList();
+            uploadedFiles.style.display = 'none';
+        });
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,127 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{% if video_info.title %}{{ video_info.title }}{% else %}Watch Video{% endif %} - YSearchPlay{% endblock %}
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/ysearchplay.css' %}">
+{% endblock %}
+{% block extra_head %}
+<meta name="description" content="Watch {{ video_info.title }} on YSearchPlay.">
+{% endblock %}
+
+{% block content %}
+<div class="container section">
+    <!-- Video Player -->
+    <div class="row">
+        <div class="col-lg-8">
+            <div id="video-container" class="video-container blurred">
+                <iframe id="video-iframe" data-video-id="{{ video_id }}" src="" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+                
+                <!-- Ad Overlay -->
+                <div id="ad-overlay" class="ad-overlay">
+                    <div class="ad-content">
+                        <h3>Advertisement</h3>
+                        <p>Your video will play after this ad.</p>
+                        <img src="https://images.unsplash.com/photo-1459184070881-58235578f004" alt="Advertisement" style="max-width: 100%; margin-top: 20px; border-radius: 8px;">
+                    </div>
+                    <div id="ad-timer" class="ad-timer">Ad: 5s</div>
+                    <button id="skip-ad-btn" class="skip-ad-btn" style="display: none;">Skip Ad</button>
+                </div>
+            </div>
+            
+            <!-- Video Details -->
+            <div class="video-details">
+                <h1 class="video-play-title">{{ video_info.title }}</h1>
+                <p class="video-play-channel">{{ video_info.channel }}</p>
+                
+                <div class="video-play-meta">
+                    <span><i class="fas fa-eye"></i> {{ video_info.views }}</span>
+                    <span><i class="fas fa-clock"></i> {{ video_info.duration }}</span>
+                </div>
+                
+                {% if user.is_staff %}
+                <button id="download-video-btn" class="btn btn-danger" data-video-id="{{ video_id }}">
+                    <i class="fas fa-download"></i> Download Video
+                </button>
+                {% endif %}
+                
+                <div class="video-description">{{ video_info.description }}</div>
+            </div>
+        </div>
+        
+        <!-- Recommendations -->
+        <div class="col-lg-4">
+            <h3 class="mb-3">Recommended Videos</h3>
+            
+            <!-- We'll use fake recommendations since we don't have real related videos -->
+            <!-- Recommendation 1 -->
+            <div class="card mb-3">
+                <div class="row g-0">
+                    <div class="col-md-5">
+                        <div class="position-relative" style="height: 100%;">
+                            <img src="https://images.unsplash.com/photo-1603566234384-f5f5b59168cc" alt="Video Thumbnail" class="w-100 h-100" style="object-fit: cover;">
+                            <span class="video-duration" style="position: absolute; bottom: 5px; right: 5px;">6:42</span>
+                        </div>
+                    </div>
+                    <div class="col-md-7">
+                        <div class="card-body">
+                            <h5 class="card-title" style="font-size: 0.9rem; font-weight: 600;">Django Project from Scratch: Full Tutorial</h5>
+                            <p class="card-text" style="font-size: 0.8rem; color: var(--dark-gray);">DjangoMasters</p>
+                            <p class="card-text" style="font-size: 0.8rem; color: var(--dark-gray);">154K views</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Recommendation 2 -->
+            <div class="card mb-3">
+                <div class="row g-0">
+                    <div class="col-md-5">
+                        <div class="position-relative" style="height: 100%;">
+                            <img src="https://images.unsplash.com/photo-1667302146840-e314e50a47d2" alt="Video Thumbnail" class="w-100 h-100" style="object-fit: cover;">
+                            <span class="video-duration" style="position: absolute; bottom: 5px; right: 5px;">12:10</span>
+                        </div>
+                    </div>
+                    <div class="col-md-7">
+                        <div class="card-body">
+                            <h5 class="card-title" style="font-size: 0.9rem; font-weight: 600;">CSS Grid Layout Explained: Complete Guide</h5>
+                            <p class="card-text" style="font-size: 0.8rem; color: var(--dark-gray);">FrontendPro</p>
+                            <p class="card-text" style="font-size: 0.8rem; color: var(--dark-gray);">87K views</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Recommendation 3 -->
+            <div class="card mb-3">
+                <div class="row g-0">
+                    <div class="col-md-5">
+                        <div class="position-relative" style="height: 100%;">
+                            <img src="https://images.unsplash.com/photo-1521302200778-33500795e128" alt="Video Thumbnail" class="w-100 h-100" style="object-fit: cover;">
+                            <span class="video-duration" style="position: absolute; bottom: 5px; right: 5px;">8:55</span>
+                        </div>
+                    </div>
+                    <div class="col-md-7">
+                        <div class="card-body">
+                            <h5 class="card-title" style="font-size: 0.9rem; font-weight: 600;">JavaScript Async/Await: Modern Promises</h5>
+                            <p class="card-text" style="font-size: 0.8rem; color: var(--dark-gray);">CodeWithMe</p>
+                            <p class="card-text" style="font-size: 0.8rem; color: var(--dark-gray);">124K views</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- View History Link -->
+            <div class="text-center mt-4">
+                <a href="{% url 'ysearchplay:history' %}" class="btn btn-secondary">
+                    <i class="fas fa-history"></i> View Your History
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="/static/js/youtube.js"></script>
+{% endblock %}

@@ -1,0 +1,144 @@
+{% extends 'base.html' %}
+
+{% block title %}
+{% if edit_mode %}Edit{% else %}Add{% endif %} Expense - SmartSpend
+{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8 col-lg-6">
+        <div class="card shadow">
+            <div class="card-header bg-primary text-white">
+                <h4 class="mb-0">
+                    <i class="fas fa-money-bill-wave me-2"></i>
+                    {% if edit_mode %}Edit{% else %}Add New{% endif %} Expense
+                </h4>
+            </div>
+            <div class="card-body">
+                <form method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    {% if next %}<input type="hidden" name="next" value="{{ next }}">{% endif %}
+                    
+                    <div class="mb-3">
+                        <label for="id_amount" class="form-label">Amount (₹)</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="fas fa-rupee-sign"></i></span>
+                            <input type="number" name="amount" step="0.01" min="0.01" id="id_amount" class="form-control" value="{{ form.amount.value|default:'' }}" required>
+                        </div>
+                        {% if form.amount.errors %}
+                            <small class="text-danger">{{ form.amount.errors }}</small>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="id_date" class="form-label">Date</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="fas fa-calendar"></i></span>
+                            <input type="date" name="date" id="id_date" class="form-control" value="{% if form.date.value %}{{ form.date.value|date:'Y-m-d' }}{% endif %}" required>
+                        </div>
+                        {% if form.date.errors %}
+                            <small class="text-danger">{{ form.date.errors }}</small>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="id_category" class="form-label">Category</label>
+                        <select name="category" id="id_category" class="form-select">
+                            <option value="">-- Select Category --</option>
+                            {% for category in categories %}
+                                <option value="{{ category.id }}" {% if form.category.value|stringformat:"i" == category.id|stringformat:"i" %}selected{% endif %}>
+                                    <i class="{{ category.icon }}"></i> {{ category.name }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                        {% if form.category.errors %}
+                            <small class="text-danger">{{ form.category.errors }}</small>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="id_description" class="form-label">Description</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="fas fa-align-left"></i></span>
+                            <input type="text" name="description" id="id_description" class="form-control" value="{{ form.description.value|default:'' }}" placeholder="What did you spend on?" required>
+                        </div>
+                        {% if form.description.errors %}
+                            <small class="text-danger">{{ form.description.errors }}</small>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="id_tag" class="form-label">Tag</label>
+                        <select name="tag" id="id_tag" class="form-select">
+                            <option value="essential" {% if form.tag.value == 'essential' %}selected{% endif %}>Essential</option>
+                            <option value="luxury" {% if form.tag.value == 'luxury' %}selected{% endif %}>Luxury</option>
+                            <option value="investment" {% if form.tag.value == 'investment' %}selected{% endif %}>Investment</option>
+                            <option value="emergency" {% if form.tag.value == 'emergency' %}selected{% endif %}>Emergency</option>
+                        </select>
+                        {% if form.tag.errors %}
+                            <small class="text-danger">{{ form.tag.errors }}</small>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label d-block">Expense Type</label>
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="radio" name="expense_type" id="id_expense_type_daily" value="daily" 
+                                {% if form.expense_type.value == 'daily' or expense_type == 'daily' or not form.expense_type.value %}checked{% endif %}>
+                            <label class="form-check-label" for="id_expense_type_daily">
+                                <span class="badge bg-warning">Daily Expense</span>
+                            </label>
+                        </div>
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="radio" name="expense_type" id="id_expense_type_fixed" value="fixed" 
+                                {% if form.expense_type.value == 'fixed' or expense_type == 'fixed' %}checked{% endif %}>
+                            <label class="form-check-label" for="id_expense_type_fixed">
+                                <span class="badge bg-danger">Fixed Expense</span>
+                            </label>
+                        </div>
+                        {% if form.expense_type.errors %}
+                            <div class="mt-1">
+                                <small class="text-danger">{{ form.expense_type.errors }}</small>
+                            </div>
+                        {% endif %}
+                    </div>
+                    
+                    {% comment %} <div class="mb-3">
+                        <label for="id_receipt_image" class="form-label">Receipt Image (Optional)</label>
+                        <input type="file" name="receipt_image" id="id_receipt_image" class="form-control" accept="image/*">
+                        {% if form.receipt_image.errors %}
+                            <small class="text-danger">{{ form.receipt_image.errors }}</small>
+                        {% endif %}
+                        {% if expense.receipt_image %}
+                            <div class="mt-2">
+                                <small class="text-muted">Current receipt: {{ expense.receipt_image.name }}</small>
+                            </div>
+                        {% endif %}
+                    </div> {% endcomment %}
+                    
+                    <div class="d-flex justify-content-between">
+                        {% if edit_mode %}
+                            <a href="{% url 'smartspend:list_expenses' %}" class="btn btn-outline-secondary">Cancel</a>
+                            <button type="submit" class="btn btn-primary">Update Expense</button>
+                        {% else %}
+                            <a href="{% if next %}{{ next }}{% else %}{% url 'smartspend:dashboard' %}{% endif %}" class="btn btn-outline-secondary">Cancel</a>
+                            <button type="submit" class="btn btn-primary">Add Expense</button>
+                        {% endif %}
+                    </div>
+                </form>
+            </div>
+        </div>
+        
+        {% if edit_mode %}
+        <div class="card mt-4 shadow-sm border-danger">
+            <div class="card-body text-center">
+                <h5 class="text-danger mb-3">Delete this expense?</h5>
+                <a href="{% url 'smartspend:delete_expense' expense.id %}" class="btn btn-danger" onclick="return confirm('Are you sure you want to delete this expense?')">
+                    <i class="fas fa-trash-alt me-1"></i> Delete Expense
+                </a>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,74 @@
+/* YouTube theme-based style */
+body {
+    background-color: #f9f9f9;
+    font-family: 'Segoe UI', sans-serif;
+}
+
+/* Custom nav-tabs */
+.custom-nav-tabs {
+    border-bottom: 2px solid #ddd;
+    padding-bottom: 10px;
+}
+
+.custom-tab {
+    background: #fff;
+    color: #c4302b;
+    padding: 10px 20px;
+    border-radius: 30px;
+    border: 1px solid #ddd;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    font-weight: 500;
+    display: inline-block;
+}
+
+.custom-tab:hover {
+    background: #c4302b;
+    color: #fff;
+}
+
+.custom-tab.active {
+    background: #c4302b;
+    color: #fff;
+    border-color: #c4302b;
+}
+
+/* Buttons */
+.btn-primary {
+    background-color: #ff0000;
+    border: none;
+}
+
+.btn-primary:hover {
+    background-color: #cc0000;
+}
+
+/* Video Card */
+.card {
+    border: 1px solid #e0e0e0;
+}
+
+.card-header {
+    background-color: #fff;
+    border-bottom: 1px solid #ddd;
+}
+
+.card-body form label {
+    font-weight: 500;
+}
+
+/* Thumbnail styling */
+.img-fluid.rounded {
+    border: 3px solid #c4302b;
+}
+
+/* Responsive design fix */
+@media (max-width: 576px) {
+    .custom-nav-tabs {
+        flex-direction: column;
+    }
+
+    .custom-tab {
+        margin-bottom: 8px;
+    }
+}

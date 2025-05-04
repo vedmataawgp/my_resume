@@ -1,0 +1,133 @@
+{% extends 'base.html' %}
+
+{% block title %}Convert Images to PDF - PDFMate{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow">
+                <div class="card-header bg-success text-white">
+                    <h2 class="mb-0">Convert Images to PDF</h2>
+                </div>
+                <div class="card-body">
+                    <div class="text-center mb-4">
+                        <p class="lead">Upload multiple images to combine them into a single PDF document.</p>
+                    </div>
+                    
+                    <form method="post" enctype="multipart/form-data" id="image-to-pdf-form">
+                        {% csrf_token %}
+                        
+                        <div class="mb-4">
+                            <div class="drop-area" id="drop-area-images">
+                                <div class="drop-area-content">
+                                    <i class="fas fa-images fa-3x mb-3"></i>
+                                    <p>Drag & drop your image files here or click to browse</p>
+                                    <p class="small text-muted">Supported formats: JPG, PNG, BMP, TIFF, GIF</p>
+                                    {{ form.images }}
+                                </div>
+                            </div>
+                            <div id="file-list" class="mt-3"></div>
+                        </div>
+                        
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-success btn-lg">Convert Images to PDF</button>
+                        </div>
+                    </form>
+                </div>
+                <div class="card-footer bg-light">
+                    <div class="row">
+                        <div class="col-md-4 text-center">
+                            <i class="fas fa-layer-group fa-2x mb-2 text-success"></i>
+                            <p class="mb-0">Multiple Images</p>
+                        </div>
+                        <div class="col-md-4 text-center">
+                            <i class="fas fa-file-pdf fa-2x mb-2 text-success"></i>
+                            <p class="mb-0">Single PDF</p>
+                        </div>
+                        <div class="col-md-4 text-center">
+                            <i class="fas fa-share-alt fa-2x mb-2 text-success"></i>
+                            <p class="mb-0">Easy Sharing</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="text-center mt-4">
+                <a href="{% url 'home' %}" class="btn btn-outline-secondary">Back to Home</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initialize drag and drop for image files
+        const fileUpload = document.getElementById('id_images');
+        const dropArea = document.getElementById('drop-area-images');
+        const fileList = document.getElementById('file-list');
+        
+        initDragAndDrop(dropArea, fileUpload, function(files) {
+            if (validateFiles(files, 'image/*')) {
+                updateFileList(files, fileList);
+                return true;
+            }
+            return false;
+        });
+        
+        // Update file list when files are selected
+        fileUpload.addEventListener('change', function() {
+            if (validateFiles(this.files, 'image/*')) {
+                updateFileList(this.files, fileList);
+            } else {
+                this.value = '';
+                fileList.innerHTML = '';
+            }
+        });
+        
+        // Function to display selected files
+        function updateFileList(files, container) {
+            container.innerHTML = '';
+            
+            if (files.length > 0) {
+                const fileListElem = document.createElement('div');
+                fileListElem.className = 'list-group';
+                
+                for (let i = 0; i < files.length; i++) {
+                    const file = files[i];
+                    const fileItem = document.createElement('div');
+                    fileItem.className = 'list-group-item d-flex justify-content-between align-items-center';
+                    
+                    const iconClass = file.type.includes('image') ? 'fas fa-image text-success' : 'fas fa-file text-secondary';
+                    
+                    fileItem.innerHTML = `
+                        <div class="d-flex align-items-center">
+                            <i class="${iconClass} me-2"></i>
+                            <div>
+                                <div class="fw-bold">${file.name}</div>
+                                <div class="small text-muted">${formatFileSize(file.size)}</div>
+                            </div>
+                        </div>
+                        <span class="badge bg-primary rounded-pill">${i + 1}</span>
+                    `;
+                    
+                    fileListElem.appendChild(fileItem);
+                }
+                
+                container.appendChild(fileListElem);
+            }
+        }
+        
+        // Validate image files
+        function validateImageFile(file) {
+            const validTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/bmp', 'image/tiff'];
+            if (!validTypes.includes(file.type)) {
+                showError(`${file.name} is not a supported image format.`);
+                return false;
+            }
+            return true;
+        }
+    });
+</script>
+{% endblock %}

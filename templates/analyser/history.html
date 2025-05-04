@@ -1,0 +1,31 @@
+
+{% extends 'base.html' %}
+{% block content %}
+<div class="card">
+    <div class="card-body">
+        <h3 class="card-title">Analysis History</h3>
+        {% if analyses %}
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>File</th>
+                        <th>Score</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for analysis in analyses %}
+                    <tr>
+                        <td>{{ analysis.created_at|date:"Y-m-d H:i" }}</td>
+                        <td>{{ analysis.filename }}</td>
+                        <td>{{ analysis.overall_score }}/100</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p>No analysis history found.</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

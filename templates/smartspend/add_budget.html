@@ -1,0 +1,104 @@
+{% extends 'base.html' %}
+{% load humanize %}
+{% load custom_filters %}
+
+{% block title %}
+{% if edit_mode %}Edit{% else %}Add{% endif %} Budget - SmartSpend
+{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8 col-lg-6">
+        <div class="card shadow">
+            <div class="card-header bg-primary text-white">
+                <h4 class="mb-0">
+                    <i class="fas fa-calculator me-2"></i>
+                    {% if edit_mode %}Edit{% else %}Add New{% endif %} Budget
+                </h4>
+            </div>
+            <div class="card-body">
+                <form method="post">
+                    {% csrf_token %}
+                    
+                    <div class="mb-3">
+                        <label for="id_category" class="form-label">Category</label>
+                        <select name="category" id="id_category" class="form-select" {% if edit_mode %}disabled{% endif %}>
+                            <option value="">-- Select Category --</option>
+                            {% for category in form.fields.category.queryset %}
+                                <option value="{{ category.id }}" {% if form.category.value|stringformat:"i" == category.id|stringformat:"i" %}selected{% endif %}>
+                                    {{ category.name }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                        {% if form.category.errors %}
+                            <small class="text-danger">{{ form.category.errors }}</small>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="id_amount" class="form-label">Budget Amount (₹)</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="fas fa-rupee-sign"></i></span>
+                            <input type="number" name="amount" step="0.01" min="0.01" id="id_amount" class="form-control" value="{{ form.amount.value|default:'' }}" required>
+                        </div>
+                        {% if form.amount.errors %}
+                            <small class="text-danger">{{ form.amount.errors }}</small>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="id_month" class="form-label">Month</label>
+                            <select name="month" id="id_month" class="form-select" {% if edit_mode %}disabled{% endif %}>
+                                {% for i in "123456789101112"|make_list %}
+                                    {% with month_num=i|stringformat:"s"|add:"0"|slice:":2" %}
+                                        <option value="{{ month_num }}" {% if form.month.value == month_num|add:"0" %}selected{% endif %}>
+                                            {{ month_num|add:"0"|get_month_name }}
+                                        </option>
+                                    {% endwith %}
+                                {% endfor %}
+                            </select>
+                            {% if form.month.errors %}
+                                <small class="text-danger">{{ form.month.errors }}</small>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <label for="id_year" class="form-label">Year</label>
+                            <select name="year" id="id_year" class="form-select" {% if edit_mode %}disabled{% endif %}>
+                                {% for y in "2023,2024,2025,2026,2027"|split:"," %}
+                                    <option value="{{ y }}" {% if form.year.value == y|add:"0" %}selected{% endif %}>{{ y }}</option>
+                                {% endfor %}
+                            </select>
+                            {% if form.year.errors %}
+                                <small class="text-danger">{{ form.year.errors }}</small>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <div class="d-flex justify-content-between">
+                        {% if edit_mode %}
+                            <a href="{% url 'smartspend:budget_planner' %}" class="btn btn-outline-secondary">Cancel</a>
+                            <button type="submit" class="btn btn-primary">Update Budget</button>
+                        {% else %}
+                            <a href="{% url 'smartspend:budget_planner' %}" class="btn btn-outline-secondary">Cancel</a>
+                            <button type="submit" class="btn btn-primary">Add Budget</button>
+                        {% endif %}
+                    </div>
+                </form>
+            </div>
+        </div>
+        
+        {% if edit_mode %}
+        <div class="card mt-4 shadow-sm border-danger">
+            <div class="card-body text-center">
+                <h5 class="text-danger mb-3">Delete this budget?</h5>
+                <a href="{% url 'smartspend:delete_budget' budget.id %}" class="btn btn-danger" onclick="return confirm('Are you sure you want to delete this budget?')">
+                    <i class="fas fa-trash-alt me-1"></i> Delete Budget
+                </a>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

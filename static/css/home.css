@@ -1,0 +1,79 @@
+.intro-section {
+    background: linear-gradient(135deg, #ffffff, #d4edda); /* White to soft green */
+    transition: all 0.3s ease-in-out;
+  }
+  
+  .intro-section:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 18px rgba(0, 128, 0, 0.15);
+  }
+  
+
+.technical-skills {
+    background: #f9f9f9;
+    padding: 2rem;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    margin-bottom: 2rem;
+  }
+  
+  .technical-skills h2 {
+    font-size: 1.8rem;
+    color: #2c3e50;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    border-bottom: 2px solid #ddd;
+    padding-bottom: 0.5rem;
+  }
+  
+  .skills-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    font-size: 1rem;
+    color: #34495e;
+  }
+  
+  .skills-grid div {
+    background: linear-gradient(135deg, #ffffff, #d4edda); /* white to light green */
+    padding: 0.75rem 1rem;
+    border-left: 4px solid #1f7c03;
+    border-radius: 8px;
+    transition: transform 0.2s ease;
+  }
+  
+  .skills-grid div:hover {
+    transform: scale(1.02);
+    border-left: 4px solid #eb650c;
+    background: linear-gradient(135deg, #ffffff, #e9f76d); 
+  }
+  
+  .skills-grid i {
+    margin-right: 6px;
+    vertical-align: middle;
+    font-size: 1rem;
+  }
+  
+
+.btn-tech:hover {
+    background-color: #1f7c03; /* Darker green on hover */
+    color: #fff; /* White text on hover */
+    transform: scale(1.05); /* Slightly larger on hover */
+  }
+
+
+.card{
+  border-right: #eb650c 4px solid;
+  border-radius: 5%;
+  transition: transform 0.6s ease;
+}
+.card:hover{
+  background: linear-gradient(160deg, #e9fcf8, #e9f76d); 
+  border-left: #04a140 4px solid;
+  border-right: none;
+  border-radius: 5%;
+}
+
+

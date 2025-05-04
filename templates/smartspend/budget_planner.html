@@ -1,0 +1,300 @@
+{% extends 'base.html' %}
+{% load humanize %}
+{% load custom_filters %}
+
+{% block title %}Budget Planner - SmartSpend{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="mb-0"><i class="fas fa-calculator me-2"></i>Budget Planner</h1>
+    <div>
+        <form method="get" class="d-flex align-items-center">
+            <div class="me-2">
+                <select name="month" class="form-select form-select-sm">
+                    {% for i in "123456789101112"|make_list %}
+                        {% with month_num=i|stringformat:"s"|add:"0"|slice:":2"|stringformat:"s" %}
+                            <option value="{{ month_num }}" {% if current_month == month_num|add:"0" %}selected{% endif %}>
+                                {{ month_num|add:"0"|get_month_name }}
+                            </option>
+                        {% endwith %}
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="me-2">
+                <select name="year" class="form-select form-select-sm">
+                    {% for y in "2023,2024,2025,2026,2027"|split:"," %}
+                        <option value="{{ y }}" {% if current_year == y|add:"0" %}selected{% endif %}>{{ y }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <button type="submit" class="btn btn-sm btn-primary">
+                <i class="fas fa-filter"></i>
+            </button>
+        </form>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-md-8">
+        <div class="card shadow">
+            <div class="card-header py-3 d-flex justify-content-between align-items-center">
+                <h5 class="mb-0 font-weight-bold">
+                    <i class="fas fa-list-ul me-2"></i>{{ month_name }} {{ current_year }} Budgets
+                </h5>
+                <a href="{% url 'smartspend:add_budget' %}" class="btn btn-sm btn-primary">
+                    <i class="fas fa-plus me-1"></i> Add Budget
+                </a>
+            </div>
+            <div class="card-body">
+                {% if budgets %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Category</th>
+                                    <th>Budgeted</th>
+                                    <th>Spent</th>
+                                    <th width="30%">Progress</th>
+                                    <th>Remaining</th>
+                                    <th class="text-center">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for budget in budgets %}
+                                    {% with spent=budget.get_spent_amount percentage=budget.get_percentage_used %}
+                                    <tr>
+                                        <td>
+                                            <i class="{{ budget.category.icon }}"></i> {{ budget.category.name }}
+                                        </td>
+                                        <td>₹{{ budget.amount|floatformat:2|intcomma }}</td>
+                                        <td>₹{{ spent|floatformat:2|intcomma }}</td>
+                                        <td>
+                                            <div class="progress">
+                                                <div class="progress-bar {% if percentage > 100 %}bg-danger{% elif percentage > 75 %}bg-warning{% else %}bg-success{% endif %}" 
+                                                     role="progressbar" style="width: {{ percentage }}%;" 
+                                                     aria-valuenow="{{ percentage }}" aria-valuemin="0" aria-valuemax="100">
+                                                    {{ percentage|floatformat:0 }}%
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td class="{% if budget.amount < spent %}text-danger{% else %}text-success{% endif %}">
+                                            ₹{{ budget.amount|sub:spent|floatformat:2|intcomma }}
+                                        </td>
+                                        <td class="text-center">
+                                            <a href="{% url 'smartspend:edit_budget' budget.id %}" class="btn btn-sm btn-outline-primary">
+                                                <i class="fas fa-edit"></i>
+                                            </a>
+                                            <a href="{% url 'smartspend:delete_budget' budget.id %}" class="btn btn-sm btn-outline-danger" 
+                                               onclick="return confirm('Are you sure you want to delete this budget?')">
+                                                <i class="fas fa-trash"></i>
+                                            </a>
+                                        </td>
+                                    </tr>
+                                    {% endwith %}
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="text-center py-5">
+                        <i class="fas fa-piggy-bank fa-4x text-muted mb-3"></i>
+                        <h5 class="text-muted">No budgets set for {{ month_name }} {{ current_year }}</h5>
+                        <p class="text-muted">Create budgets to track your spending and save more!</p>
+                        <a href="{% url 'smartspend:add_budget' %}" class="btn btn-primary mt-2">
+                            <i class="fas fa-plus me-1"></i> Create First Budget
+                        </a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card shadow h-100">
+            <div class="card-header py-3">
+                <h5 class="mb-0 font-weight-bold">
+                    <i class="fas fa-info-circle me-2"></i>Budget Overview
+                </h5>
+            </div>
+            <div class="card-body">
+                {% if budgets %}
+                    <div class="chart-container mb-4" style="position: relative; height:250px;">
+                        <canvas id="budgetOverviewChart"></canvas>
+                    </div>
+                    
+                    <div class="alert alert-info">
+                        <h6><i class="fas fa-lightbulb me-2"></i>Budget Tips</h6>
+                        <ul class="mb-0">
+                            <li>Try to allocate no more than 50% for necessities</li>
+                            <li>Aim for at least 20% towards savings</li>
+                            <li>Adjust your budgets monthly based on your spending patterns</li>
+                        </ul>
+                    </div>
+                {% else %}
+                    <div class="text-center py-4">
+                        <p class="text-muted">
+                            Create budgets to see your spending overview here.
+                        </p>
+                        <img src="https://images.unsplash.com/photo-1554224155-6726b3ff858f" alt="Budget Planning" class="img-fluid rounded mt-3 mb-3" style="max-height: 200px;">
+                    </div>
+                {% endif %}
+                
+                {% if available_categories %}
+                    <div class="mt-4">
+                        <h6 class="mb-3"><i class="fas fa-plus-circle me-2"></i>Quick Add Budget</h6>
+                        <form action="{% url 'smartspend:add_budget' %}" method="post" class="quick-budget-form">
+                            {% csrf_token %}
+                            <div class="row g-2">
+                                <div class="col-7">
+                                    <select name="category" class="form-select">
+                                        {% for category in available_categories %}
+                                            <option value="{{ category.id }}">{{ category.name }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <div class="col-5">
+                                    <div class="input-group">
+                                        <span class="input-group-text">₹</span>
+                                        <input type="number" name="amount" step="0.01" min="0.01" class="form-control" required>
+                                    </div>
+                                </div>
+                            </div>
+                            <input type="hidden" name="month" value="{{ current_month }}">
+                            <input type="hidden" name="year" value="{{ current_year }}">
+                            <button type="submit" class="btn btn-primary w-100 mt-2">Add Budget</button>
+                        </form>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-12">
+        <div class="card shadow">
+            <div class="card-header py-3">
+                <h5 class="mb-0 font-weight-bold">
+                    <i class="fas fa-chart-bar me-2"></i>Monthly Budget vs Spending Analysis
+                </h5>
+            </div>
+            <div class="card-body">
+                {% if budgets %}
+                    <div class="chart-container" style="position: relative; height:350px;">
+                        <canvas id="budgetComparisonChart"></canvas>
+                    </div>
+                {% else %}
+                    <div class="text-center py-5">
+                        <img src="https://images.unsplash.com/photo-1450101499163-c8848c66ca85" alt="Budget Planning" class="img-fluid rounded mb-3" style="max-height: 250px;">
+                        <h5 class="text-muted">Set up budgets to see your analysis here</h5>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        {% if budgets %}
+            // Budget Overview Chart
+            const budgetData = {
+                labels: [{% for budget in budgets %}"{{ budget.category.name }}",{% endfor %}],
+                datasets: [{
+                    label: 'Budget Amount',
+                    data: [{% for budget in budgets %}{{ budget.amount }},{% endfor %}],
+                    backgroundColor: [
+                        '#4e73df', '#1cc88a', '#36b9cc', '#f6c23e', '#e74a3b',
+                        '#858796', '#5a5c69', '#6610f2', '#6f42c1', '#fd7e14',
+                    ],
+                    borderWidth: 1
+                }]
+            };
+            
+            const budgetSpendingData = {
+                labels: [{% for budget in budgets %}"{{ budget.category.name }}",{% endfor %}],
+                datasets: [
+                    {
+                        label: 'Budget Amount',
+                        data: [{% for budget in budgets %}{{ budget.amount }},{% endfor %}],
+                        backgroundColor: 'rgba(78, 115, 223, 0.5)',
+                        borderColor: 'rgb(78, 115, 223)',
+                        borderWidth: 1
+                    },
+                    {
+                        label: 'Spent Amount',
+                        data: [{% for budget in budgets %}{{ budget.get_spent_amount }},{% endfor %}],
+                        backgroundColor: 'rgba(231, 74, 59, 0.5)',
+                        borderColor: 'rgb(231, 74, 59)',
+                        borderWidth: 1
+                    }
+                ]
+            };
+            
+            new Chart(document.getElementById('budgetOverviewChart'), {
+                type: 'pie',
+                data: budgetData,
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'right',
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.label || '';
+                                    if (label) {
+                                        label += ': ';
+                                    }
+                                    label += '₹' + context.parsed.toFixed(2);
+                                    return label;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+            
+            new Chart(document.getElementById('budgetComparisonChart'), {
+                type: 'bar',
+                data: budgetSpendingData,
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function(value) {
+                                    return '₹' + value;
+                                }
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.dataset.label || '';
+                                    if (label) {
+                                        label += ': ';
+                                    }
+                                    label += '₹' + context.parsed.y.toFixed(2);
+                                    return label;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        {% endif %}
+    });
+</script>
+{% endblock %}

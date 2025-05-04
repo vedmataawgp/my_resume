@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SmartSpend - {% block title %}Your Personal Expense & Budget Optimizer{% endblock %}</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Google Fonts - Already imported in CSS -->
+    
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/static/css/main.css">
+    
+    <!-- Animation Libraries -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    
+    {% block extra_css %}{% endblock %}
+</head>
+<body data-bs-theme="light" class="fade-in">
+    {% if user.is_authenticated %}
+    <!-- Improved Practical Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark sticky-top">
+        <div class="container">
+            <a class="navbar-brand" href="{% url 'dashboard' %}">
+                <i class="fas fa-wallet me-2"></i>SmartSpend
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.path == '/' %}active{% endif %}" href="{% url 'dashboard' %}">
+                            <i class="fas fa-chart-pie me-1"></i> Dashboard
+                        </a>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-money-bill-wave me-1"></i> Expenses & Income
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="{% url 'add_expense' %}"><i class="fas fa-plus-circle"></i> Add Expense</a></li>
+                            <li><a class="dropdown-item" href="{% url 'add_income' %}"><i class="fas fa-plus-circle"></i> Add Income</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="{% url 'list_expenses' %}"><i class="fas fa-list"></i> View Expenses</a></li>
+                            <li><a class="dropdown-item" href="{% url 'list_incomes' %}"><i class="fas fa-list"></i> View Income</a></li>
+                        </ul>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if 'budget' in request.path %}active{% endif %}" href="{% url 'budget_planner' %}">
+                            <i class="fas fa-calculator me-1"></i> Budget
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if 'savings' in request.path %}active{% endif %}" href="{% url 'savings_goals' %}">
+                            <i class="fas fa-piggy-bank me-1"></i> Savings
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if 'recurring' in request.path %}active{% endif %}" href="{% url 'recurring_expenses' %}">
+                            <i class="fas fa-sync-alt me-1"></i> Recurring
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if 'reports' in request.path %}active{% endif %}" href="{% url 'reports' %}">
+                            <i class="fas fa-file-alt me-1"></i> Reports
+                        </a>
+                    </li>
+                </ul>
+
+                <div class="d-flex align-items-center">
+                    <!-- Quick Action Buttons -->
+                    <a href="{% url 'add_expense' %}" class="btn btn-primary btn-sm me-2">
+                        <i class="fas fa-plus-circle"></i> New Expense
+                    </a>
+                    <a href="{% url 'add_income' %}" class="btn btn-success btn-sm me-3">
+                        <i class="fas fa-plus-circle"></i> New Income
+                    </a>
+
+                    <!-- User Dropdown -->
+                    <div class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle text-white" href="#" role="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-user-circle me-1"></i> <span>{{ user.username }}</span>
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li><a class="dropdown-item" href="{% url 'profile' %}"><i class="fas fa-user"></i> Profile</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li>
+                                <form method="POST" action="{% url 'logout' %}" style="display: inline;">
+                                    {% csrf_token %}
+                                    <button type="submit" class="dropdown-item">
+                                        <i class="fas fa-sign-out-alt"></i> Logout
+                                    </button>
+                                </form>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+    {% endif %}
+    
+    <!-- Main Content -->
+    <main class="container py-4">
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show animate__animated animate__fadeInDown" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            {% endfor %}
+        {% endif %}
+        
+        {% block content %}{% endblock %}
+    </main>
+    
+    <!-- Footer -->
+    <footer class="footer py-3 mt-auto">
+        <div class="container">
+            <div class="text-center">
+                <span class="text-muted">© 2025 SmartSpend - Your Personal Expense & Budget Optimizer</span>
+            </div>
+        </div>
+    </footer>
+    
+    <!-- Bootstrap JS Bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Custom JS -->
+    <script src="/static/js/main.js"></script>
+    <script src="/static/js/feature-tour.js"></script>
+    
+    <!-- Theme Toggle Script -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const themeToggle = document.getElementById('theme-toggle');
+            const themeText = document.getElementById('theme-text');
+            const body = document.body;
+            
+            // Check for saved theme preference or use default
+            const savedTheme = localStorage.getItem('theme') || 'light';
+            body.setAttribute('data-bs-theme', savedTheme);
+            
+            // Update button text and icon based on current theme
+            if(savedTheme === 'dark') {
+                themeText.textContent = 'Light Mode';
+                themeToggle.querySelector('i').classList.replace('fa-moon', 'fa-sun');
+            }
+            
+            // Toggle theme on click
+            themeToggle.addEventListener('click', function() {
+                if(body.getAttribute('data-bs-theme') === 'light') {
+                    body.setAttribute('data-bs-theme', 'dark');
+                    localStorage.setItem('theme', 'dark');
+                    themeText.textContent = 'Light Mode';
+                    themeToggle.querySelector('i').classList.replace('fa-moon', 'fa-sun');
+                } else {
+                    body.setAttribute('data-bs-theme', 'light');
+                    localStorage.setItem('theme', 'light');
+                    themeText.textContent = 'Dark Mode';
+                    themeToggle.querySelector('i').classList.replace('fa-sun', 'fa-moon');
+                }
+            });
+        });
+        
+        // Add animation to cards on scroll
+        document.addEventListener('DOMContentLoaded', function() {
+            const cards = document.querySelectorAll('.card');
+            
+            const observer = new IntersectionObserver(entries => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('slide-up');
+                        observer.unobserve(entry.target);
+                    }
+                });
+            }, { threshold: 0.1 });
+            
+            cards.forEach(card => {
+                observer.observe(card);
+            });
+        });
+    </script>
+    
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

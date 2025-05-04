@@ -1,0 +1,115 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Search Results for "{{ query }}" - YSearchPlay{% endblock %}
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/ysearchplay.css' %}">
+{% endblock %}
+{% block extra_head %}
+<meta name="description" content="Search results for {{ query }} on YSearchPlay.">
+{% endblock %}
+
+{% block content %}
+<!-- Search Results Header -->
+<div class="search-container" style="padding: 40px 0;">
+    <div class="container">
+        <h1 class="search-title">Search Results for "{{ query }}"</h1>
+        
+        <form action="{% url 'ysearchplay:search' %}" method="post" class="search-form">
+            {% csrf_token %}
+            <input type="text" name="q" class="search-input" value="{{ query }}" required>
+            <button type="submit" class="search-btn">
+                <i class="fas fa-search"></i> Search
+            </button>
+        </form>
+    </div>
+</div>
+
+<!-- Results Section -->
+<section class="section">
+    <div class="container">
+        {% if results %}
+            <p class="mb-4">Found {{ results|length }} results for "{{ query }}"</p>
+            
+            <div class="videos-grid">
+                {% for video in results %}
+                <div class="card video-card">
+                    <div class="video-thumbnail">
+                        {% if video.thumbnail %}
+                            <img src="{{ video.thumbnail }}" alt="{{ video.title }}">
+                        {% else %}
+                            <img src="https://images.unsplash.com/photo-1521302200778-33500795e128" alt="Placeholder Thumbnail">
+                        {% endif %}
+                        
+                        {% if video.duration %}
+                            <span class="video-duration">{{ video.duration }}</span>
+                        {% endif %}
+                    </div>
+                    <div class="video-info">
+                        <h3 class="video-title">{{ video.title }}</h3>
+                        <p class="video-channel">{{ video.channel }}</p>
+                        <p class="video-views">{{ video.views }}</p>
+                        <a href="{% url 'ysearchplay:play' video_id=video.id %}" class="btn btn-primary play-btn" data-video-id="{{ video.id }}">Watch Now</a>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            
+            <!-- Pagination -->
+            <div class="pagination">
+                {% if page > 1 %}
+                <a href="{% url 'ysearchplay:results' query=query %}?page={{ page|add:'-1' }}" class="page-link">
+                    <i class="fas fa-chevron-left"></i>
+                </a>
+                {% endif %}
+                
+                {% for p in '12345'|make_list %}
+                    {% if forloop.counter == page %}
+                    <a href="{% url 'ysearchplay:results' query=query %}?page={{ forloop.counter }}" class="page-link active">{{ forloop.counter }}</a>
+                    {% else %}
+                    <a href="{% url 'ysearchplay:results' query=query %}?page={{ forloop.counter }}" class="page-link">{{ forloop.counter }}</a>
+                    {% endif %}
+                {% endfor %}
+                
+                <a href="{% url 'ysearchplay:results' query=query %}?page={{ page|add:'1' }}" class="page-link">
+                    <i class="fas fa-chevron-right"></i>
+                </a>
+            </div>
+        {% else %}
+            <div class="text-center my-5">
+                <i class="fas fa-search fa-3x mb-3" style="color: var(--dark-gray);"></i>
+                <h2>No results found for "{{ query }}"</h2>
+                <p>Try different keywords or check your spelling.</p>
+                <a href="{% url 'ysearchplay:home' %}" class="btn btn-primary mt-3">Back to Search</a>
+            </div>
+        {% endif %}
+    </div>
+</section>
+
+<!-- Video Modal -->
+<div id="video-modal" class="modal">
+    <div class="modal-content">
+        <span class="close-modal">&times;</span>
+        <div class="modal-body">
+            <h2 id="modal-video-title" class="mb-3"></h2>
+            
+            <div id="modal-video-container" class="video-container">
+                <iframe id="modal-video-iframe" src="" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+                
+                <!-- Modal Ad Overlay -->
+                <div id="modal-ad-overlay" class="ad-overlay">
+                    <div class="ad-content">
+                        <h3>Advertisement</h3>
+                        <p>Your video will play after this ad.</p>
+                    </div>
+                    <div id="modal-ad-timer" class="ad-timer">Ad: 5s</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="/static/js/youtube.js"></script>
+{% endblock %}

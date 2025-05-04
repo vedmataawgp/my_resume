@@ -1,0 +1,145 @@
+/* General Styles */
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f8f9fa;
+    color: #333;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    font-weight: 600;
+}
+
+/* Drop Area Styles */
+.drop-area {
+    border: 2px dashed #ccc;
+    border-radius: 8px;
+    padding: 40px 20px;
+    text-align: center;
+    background-color: #f9f9f9;
+    transition: background-color 0.3s, border-color 0.3s;
+    cursor: pointer;
+}
+
+.drop-area:hover, .drop-area.highlight {
+    background-color: #f0f0f0;
+    border-color: #6c757d;
+}
+
+.drop-message {
+    color: #6c757d;
+}
+
+.drop-message h4, .drop-message h5 {
+    margin-bottom: 10px;
+}
+
+/* Card Styles */
+.card {
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    margin-bottom: 20px;
+    overflow: hidden;
+}
+
+.card-header {
+    font-weight: 600;
+}
+
+/* File List Styles */
+#sortableList li, #fileList li {
+    transition: all 0.2s;
+    position: relative;
+}
+
+#sortableList li:hover {
+    background-color: #f8f9fa;
+}
+
+#sortableList .fa-arrows-alt {
+    cursor: move;
+}
+
+/* Button Styles */
+.btn {
+    border-radius: 4px;
+    font-weight: 500;
+}
+
+.btn-primary {
+    background-color: #0d6efd;
+}
+
+.btn-primary:hover {
+    background-color: #0b5ed7;
+}
+
+/* Navbar Styles */
+.navbar {
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.navbar-brand {
+    font-weight: 700;
+    font-size: 1.4rem;
+}
+
+/* Form Styles */
+.form-control {
+    border-radius: 4px;
+}
+
+.form-control:focus {
+    box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+}
+
+/* Footer Styles */
+footer {
+    border-top: 1px solid #e6e6e6;
+}
+
+/* Tool Cards on Home Page */
+.card .fa-3x {
+    margin-bottom: 15px;
+}
+
+/* Welcome Modal */
+#welcomeModal .fa-3x {
+    color: #0d6efd;
+}
+
+#welcomeModal .list-group-item {
+    border-left: none;
+    border-right: none;
+}
+
+/* Remove Button Animation */
+.remove-btn {
+    transition: all 0.3s;
+}
+
+.remove-btn:hover {
+    transform: scale(1.1);
+}
+
+/* Progress Bar */
+.progress {
+    height: 10px;
+    border-radius: 5px;
+}
+
+/* File Preview Container */
+#filePreview .card {
+    background-color: #f8f9fa;
+}
+
+/* Mobile Responsiveness */
+@media (max-width: 768px) {
+    .drop-area {
+        padding: 20px 10px;
+    }
+    
+    #sortableList .page-range {
+        width: 100% !important;
+        margin-top: 10px;
+    }
+}

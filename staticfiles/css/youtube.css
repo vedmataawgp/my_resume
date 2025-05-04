@@ -1,0 +1,144 @@
+/* Base Styles */
+body {
+    font-family: 'Inter', sans-serif;
+    background: linear-gradient(135deg, #f5f7fa, #c3cfe2);
+    color: #1e1e2f;
+    margin: 0;
+    padding: 0;
+}
+
+/* Header */
+header h1 {
+    text-align: center;
+    font-weight: 800;
+    font-size: 2.8rem;
+    background: linear-gradient(to right, #ff416c, #ff4b2b);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+/* Alerts */
+.messages .alert {
+    font-size: 1rem;
+    padding: 1rem;
+    border-radius: 1rem;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* Hero Section */
+.p-5.bg-body-tertiary {
+    background: #ffffff;
+    border-radius: 1rem;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.07);
+}
+
+.p-5 h2 {
+    font-size: 2.2rem;
+    color: #333;
+}
+
+.p-5 p {
+    font-size: 1.2rem;
+    color: #555;
+}
+
+.btn-primary {
+    background: linear-gradient(to right, #ff416c, #ff4b2b);
+    border: none;
+    color: white;
+    font-weight: 600;
+    padding: 0.75rem 1.5rem;
+    border-radius: 0.75rem;
+    transition: all 0.3s ease-in-out;
+}
+
+.btn-primary:hover {
+    transform: scale(1.05);
+    box-shadow: 0 8px 20px rgba(255, 65, 108, 0.4);
+}
+
+.btn-outline-secondary {
+    border: 2px solid #007bff;
+    color: #007bff;
+    font-weight: 600;
+    padding: 0.75rem 1.5rem;
+    border-radius: 0.75rem;
+    transition: all 0.3s ease;
+}
+
+.btn-outline-secondary:hover {
+    background-color: #007bff;
+    color: white;
+    transform: scale(1.05);
+}
+
+/* Card Section */
+.h-100 {
+    background: #ffffff;
+    border-radius: 1rem;
+    padding: 2rem;
+    transition: all 0.3s ease;
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.05);
+}
+
+.h-100:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.1);
+}
+
+.h-100 h2 {
+    font-size: 1.75rem;
+    margin-bottom: 1rem;
+    color: #333;
+}
+
+.h-100 p,
+.h-100 li {
+    font-size: 1rem;
+    color: #444;
+}
+
+.h-100 a.btn {
+    margin-top: 1.5rem;
+    padding: 0.6rem 1.2rem;
+    border-radius: 0.5rem;
+    font-weight: 600;
+}
+
+/* How To Use Section */
+.mt-5 {
+    background: #fff;
+    padding: 2rem;
+    border-radius: 1rem;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.05);
+    margin-top: 3rem;
+}
+
+.mt-5 h3 {
+    font-size: 1.6rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+    color: #0d6efd;
+}
+
+.mt-5 ol {
+    padding-left: 1.5rem;
+    font-size: 1.05rem;
+    line-height: 1.8;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    header h1 {
+        font-size: 2rem;
+    }
+
+    .p-5 h2 {
+        font-size: 1.5rem;
+    }
+
+    .p-5 p {
+        font-size: 1rem;
+    }
+}

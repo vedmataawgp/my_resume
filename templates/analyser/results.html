@@ -1,0 +1,147 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Resume Analysis Results{% endblock %}
+
+{% block extra_css %}
+<style>
+    .chart-container {
+        margin-bottom: 0; /* Remove bottom margin */
+        max-width: 30%; /* Limit the maximum width of the chart */
+        height: 700px; /* Set a fixed height for the chart */
+    }
+
+    .chart-container .card {
+        margin-bottom: 0 !important; /* Ensures no bottom margin from Bootstrap card spacing */
+    }
+    
+    .card {
+        border-radius: 10px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+    .card-header {
+        background-color: #007bff;
+        color: white;
+        font-weight: bold;
+        text-align: center;
+        border-radius: 10px 10px 0 0;
+    }
+    canvas {
+        display: block;
+        max-width: 100%; /* Ensure the canvas is responsive */
+        height: 100%; /* Maintain aspect ratio */
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h1 class="text-center mb-4">Resume Analysis Results</h1>
+
+    
+    <!-- Named Entities Section -->
+    <div class="card mt-4">
+        <div class="card-header">
+            Named Entities
+        </div>
+        <div class="card-body">
+            <ul>
+                {% for entity, label in analysis.entities %}
+                <li><strong>{{ entity }}</strong> <span class="badge bg-secondary">{{ label }}</span></li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+    
+    <!-- Pie Chart Section -->
+    <div class="chart-container">
+        <div class="card">
+            <div class="card-header">
+                Accuracy Breakdown
+            </div>
+            <div class="card-body">
+                <canvas id="accuracyChart"></canvas>
+            </div>
+        </div>
+    </div>
+    <!-- Extracted Skills Section -->
+    <div class="card mt-4">
+        <div class="card-header">
+            Extracted Skills
+        </div>
+        <div class="card-body">
+            <ul>
+                {% for skill in analysis.skills %}
+                    <li><i class="fas fa-check-circle text-success me-2"></i>{{ skill }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+
+    <!-- Statistics Section -->
+    <div class="card mt-4">
+        <div class="card-header">
+            Statistics
+        </div>
+        <div class="card-body">
+            <p><strong>Word Count:</strong> {{ analysis.word_count }}</p>
+            <p><strong>Sentence Count:</strong> {{ analysis.sentence_count }}</p>
+        </div>
+    </div>
+
+    <!-- Suggestions Section -->
+    <div class="card mt-4 suggestions">
+        <div class="card-header">
+            Suggestions for Improvement
+        </div>
+        <div class="card-body">
+            <ul>
+                {% for category, suggestions in analysis.suggestions.items %}
+                    <li><strong>{{ category }}:</strong>
+                        <ul>
+                            {% for suggestion in suggestions %}
+                                <li>{{ suggestion }}</li>
+                            {% endfor %}
+                        </ul>
+                    </li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+</div>
+
+<!-- Chart.js Script -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    const ctx = document.getElementById('accuracyChart').getContext('2d');
+    const accuracyChart = new Chart(ctx, {
+        type: 'pie',
+        data: {
+            labels: ['Grammar Score', 'Keyword Density', 'Experience'],
+            datasets: [{
+                data: [
+                    {{ analysis.grammar_score }},
+                    {{ analysis.keyword_density }},
+                    {{ analysis.experience }}
+                ],
+                backgroundColor: ['#06D6A0', '#FFD166', '#118AB2']
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: true, // Ensure the chart maintains its aspect ratio
+            plugins: {
+                legend: {
+                    position: 'top',
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            return context.label + ': ' + context.raw.toFixed(2) + '%';
+                        }
+                    }
+                }
+            }
+        }
+    });
+</script>
+{% endblock %}

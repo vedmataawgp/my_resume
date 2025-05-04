@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}YouTube Media Downloader{% endblock %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/youtube.css' %}">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <header class="pb-3 mb-4 border-bottom text-center">
+        <h1 class="display-5 fw-bold text-danger"><i class="bi bi-youtube"></i> YouTube Media Downloader</h1>
+    </header>
+
+    {% if messages %}
+    <div class="messages">
+        {% for message in messages %}
+        <div class="alert alert-{% if message.tags == 'error' %}danger{% else %}{{ message.tags }}{% endif %} alert-dismissible fade show">
+            <i class="bi bi-info-circle-fill me-2"></i> {{ message|safe }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <div class="p-5 mb-4 bg-body-tertiary rounded-3 shadow-sm">
+        <div class="container-fluid py-5">
+            <h2 class="display-6 fw-bold"><i class="bi bi-cloud-arrow-down-fill text-primary"></i> Download YouTube Videos</h2>
+            <p class="col-md-8 fs-4">Download videos and playlists from YouTube with various quality options.</p>
+            <div class="d-grid gap-2 d-md-flex justify-content-md-start">
+                <a href="{% url 'youtube_media_downloader:video' %}" class="btn btn-danger btn-lg px-4 me-md-2">
+                    <i class="bi bi-file-earmark-play-fill me-1"></i> Download Video
+                </a>
+                <a href="{% url 'youtube_media_downloader:playlist' %}" class="btn btn-outline-primary btn-lg px-4">
+                    <i class="bi bi-collection-play-fill me-1"></i> Download Playlist
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="row align-items-md-stretch">
+        <div class="col-md-6">
+            <div class="h-100 p-5 border rounded-3 shadow-sm bg-white">
+                <h2><i class="bi bi-play-btn-fill text-danger me-2"></i>Video Downloader</h2>
+                <p>Download individual YouTube videos in different formats and quality options.</p>
+                <ul class="list-unstyled">
+                    <li><i class="bi bi-check-circle-fill text-success me-2"></i> Multiple video quality options</li>
+                    <li><i class="bi bi-music-note-beamed text-primary me-2"></i> Audio-only downloads</li>
+                    <li><i class="bi bi-file-earmark-text-fill text-warning me-2"></i> Format selection</li>
+                </ul>
+                <a href="{% url 'youtube_media_downloader:video' %}" class="btn btn-outline-danger mt-3">
+                    <i class="bi bi-download me-1"></i> Download Video
+                </a>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="h-100 p-5 bg-body-tertiary border rounded-3 shadow-sm">
+                <h2><i class="bi bi-collection-play-fill text-primary me-2"></i>Playlist Downloader</h2>
+                <p>Download entire YouTube playlists with customizable quality settings.</p>
+                <ul class="list-unstyled">
+                    <li><i class="bi bi-list-check text-success me-2"></i> Batch download all videos</li>
+                    <li><i class="bi bi-sliders text-warning me-2"></i> Select quality for entire playlist</li>
+                    <li><i class="bi bi-eye-fill text-info me-2"></i> View all videos in playlist</li>
+                </ul>
+                <a href="{% url 'youtube_media_downloader:playlist' %}" class="btn btn-outline-primary mt-3">
+                    <i class="bi bi-download me-1"></i> Download Playlist
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="mt-5">
+        <h3 class="text-primary"><i class="bi bi-info-circle-fill me-2"></i>How to use the downloader</h3>
+        <ol class="fs-5">
+            <li><i class="bi bi-link-45deg text-danger me-1"></i> Copy a YouTube video or playlist URL</li>
+            <li><i class="bi bi-clipboard-plus text-success me-1"></i> Paste the URL in the appropriate form</li>
+            <li><i class="bi bi-sliders2-vertical text-primary me-1"></i> Select your desired quality/format</li>
+            <li><i class="bi bi-cloud-arrow-down-fill text-warning me-1"></i> Click the download button</li>
+            <li><i class="bi bi-hourglass-split text-secondary me-1"></i> Wait for the download to complete</li>
+        </ol>
+    </div>
+</div>
+{% endblock %}

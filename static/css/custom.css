@@ -1,0 +1,56 @@
+/* Custom styles for YouTube Downloader */
+
+.thumbnail-img {
+    max-height: 200px;
+    width: auto;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+.thumbnail-sm {
+    width: 80px;
+    height: 45px;
+    object-fit: cover;
+    border-radius: 3px;
+}
+
+.footer {
+    margin-top: 3rem;
+    border-top: 1px solid var(--bs-gray-700);
+}
+
+/* Progress bar styling */
+.progress {
+    height: 20px;
+    margin-bottom: 15px;
+    border-radius: 3px;
+}
+
+/* Card styling */
+.card {
+    border-radius: 8px;
+    border: 1px solid var(--bs-gray-700);
+    margin-bottom: 20px;
+}
+
+.card-header {
+    background-color: rgba(0, 0, 0, 0.2);
+    border-bottom: 1px solid var(--bs-gray-700);
+}
+
+/* Button hover effects */
+.btn-primary:hover, .btn-success:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    transition: all 0.3s ease;
+}
+
+/* Table styling */
+.table th {
+    background-color: rgba(0, 0, 0, 0.2);
+}
+
+/* Form focus styling */
+.form-control:focus {
+    border-color: var(--bs-primary);
+    box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+}

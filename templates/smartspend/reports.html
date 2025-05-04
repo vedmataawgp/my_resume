@@ -1,0 +1,404 @@
+{% extends 'base.html' %}
+{% load humanize %}
+{% load custom_filters %}
+
+{% block title %}Financial Reports - SmartSpend{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="mb-0"><i class="fas fa-file-alt me-2"></i>Financial Reports</h1>
+    <a href="{% url 'smartspend:export_data' %}?start_date={{ start_date|date:'Y-m-d' }}&end_date={{ end_date|date:'Y-m-d' }}" class="btn btn-success">
+        <i class="fas fa-download me-1"></i> Export to CSV
+    </a>
+</div>
+
+<div class="card shadow mb-4">
+    <div class="card-header py-3 bg-light">
+        <h6 class="m-0 font-weight-bold"><i class="fas fa-calendar me-2"></i>Select Date Range</h6>
+    </div>
+    <div class="card-body">
+        <form method="get" class="row g-3">
+            <div class="col-md-5">
+                <label for="id_start_date" class="form-label">Start Date</label>
+                <input type="date" name="start_date" id="id_start_date" class="form-control" value="{{ start_date|date:'Y-m-d' }}" required>
+            </div>
+            
+            <div class="col-md-5">
+                <label for="id_end_date" class="form-label">End Date</label>
+                <input type="date" name="end_date" id="id_end_date" class="form-control" value="{{ end_date|date:'Y-m-d' }}" required>
+            </div>
+            
+            <div class="col-md-2 d-flex align-items-end">
+                <button type="submit" class="btn btn-primary w-100">
+                    <i class="fas fa-search me-1"></i> Generate Report
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="row g-4 mb-4">
+    <!-- Summary Cards -->
+    <div class="col-md-4">
+        <div class="card border-left-success shadow h-100">
+            <div class="card-body">
+                <div class="row align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                            Total Income
+                        </div>
+                        <div class="h4 mb-0 font-weight-bold">₹{{ total_income|floatformat:2|intcomma }}</div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="fas fa-rupee-sign fa-2x text-success"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card border-left-danger shadow h-100">
+            <div class="card-body">
+                <div class="row align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-danger text-uppercase mb-1">
+                            Total Expenses
+                        </div>
+                        <div class="h4 mb-0 font-weight-bold">₹{{ total_expense|floatformat:2|intcomma }}</div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="fas fa-credit-card fa-2x text-danger"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card border-left-info shadow h-100">
+            <div class="card-body">
+                <div class="row align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
+                            Net Savings
+                        </div>
+                        <div class="h4 mb-0 font-weight-bold {% if net_savings < 0 %}text-danger{% else %}text-info{% endif %}">
+                            ₹{{ net_savings|floatformat:2|intcomma }}
+                        </div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="fas fa-piggy-bank fa-2x text-info"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4">
+    <!-- Charts and breakdown -->
+    <div class="col-lg-8">
+        <!-- Expense by Category Chart -->
+        <div class="card shadow mb-4">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold"><i class="fas fa-chart-pie me-2"></i>Expenses by Category</h6>
+            </div>
+            <div class="card-body">
+                {% if category_expenses %}
+                    <div class="chart-container" style="position: relative; height:300px;">
+                        <canvas id="categoryExpenseChart"></canvas>
+                    </div>
+                {% else %}
+                    <div class="text-center py-4">
+                        <p class="text-muted">No expense data available for the selected period.</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Daily Expense Trend -->
+        <div class="card shadow mb-4">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold"><i class="fas fa-chart-line me-2"></i>Daily Expense Trend</h6>
+            </div>
+            <div class="card-body">
+                {% if daily_expenses %}
+                    <div class="chart-container" style="position: relative; height:300px;">
+                        <canvas id="dailyExpenseChart"></canvas>
+                    </div>
+                {% else %}
+                    <div class="text-center py-4">
+                        <p class="text-muted">No daily expense data available for the selected period.</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-4">
+        <!-- Expense by Tag -->
+        <div class="card shadow mb-4">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold"><i class="fas fa-tags me-2"></i>Expenses by Tag</h6>
+            </div>
+            <div class="card-body">
+                {% if tag_expenses %}
+                    <div class="chart-container mb-3" style="position: relative; height:200px;">
+                        <canvas id="tagExpenseChart"></canvas>
+                    </div>
+                    
+                    <div class="table-responsive">
+                        <table class="table table-sm">
+                            <thead>
+                                <tr>
+                                    <th>Tag</th>
+                                    <th class="text-end">Amount</th>
+                                    <th class="text-end">Percentage</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for tag in tag_expenses %}
+                                    <tr>
+                                        <td>
+                                            <span class="badge 
+                                                {% if tag.tag == 'essential' %}bg-success
+                                                {% elif tag.tag == 'luxury' %}bg-warning
+                                                {% elif tag.tag == 'investment' %}bg-info
+                                                {% elif tag.tag == 'emergency' %}bg-danger
+                                                {% endif %}">
+                                                {{ tag.tag|title }}
+                                            </span>
+                                        </td>
+                                        <td class="text-end">₹{{ tag.total|floatformat:2|intcomma }}</td>
+                                        <td class="text-end">{{ tag.total|percentage:total_expense }}%</td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="text-center py-4">
+                        <p class="text-muted">No tag data available for the selected period.</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Category Breakdown -->
+        <div class="card shadow">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold"><i class="fas fa-list me-2"></i>Category Breakdown</h6>
+            </div>
+            <div class="card-body">
+                {% if category_expenses %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Category</th>
+                                    <th class="text-end">Amount</th>
+                                    <th class="text-end">Percentage</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for category in category_expenses %}
+                                    <tr>
+                                        <td>{{ category.category__name|default:"Uncategorized" }}</td>
+                                        <td class="text-end">₹{{ category.total|floatformat:2|intcomma }}</td>
+                                        <td class="text-end">{{ category.total|percentage:total_expense }}%</td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                            <tfoot>
+                                <tr class="fw-bold">
+                                    <td>Total</td>
+                                    <td class="text-end">₹{{ total_expense|floatformat:2|intcomma }}</td>
+                                    <td class="text-end">100%</td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="text-center py-4">
+                        <p class="text-muted">No category data available for the selected period.</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Define chart colors
+        const chartColors = [
+            '#4e73df', '#1cc88a', '#36b9cc', '#f6c23e', '#e74a3b',
+            '#858796', '#5a5c69', '#6610f2', '#6f42c1', '#fd7e14',
+        ];
+        
+        {% if category_expenses %}
+            // Category Expense Chart
+            const categoryData = {
+                labels: [
+                    {% for category in category_expenses %}
+                        "{{ category.category__name|default:'Uncategorized' }}",
+                    {% endfor %}
+                ],
+                datasets: [{
+                    data: [
+                        {% for category in category_expenses %}
+                            {{ category.total }},
+                        {% endfor %}
+                    ],
+                    backgroundColor: chartColors,
+                    hoverBackgroundColor: chartColors.map(color => color.replace('0.8', '1')),
+                    hoverBorderColor: "rgba(234, 236, 244, 1)",
+                }]
+            };
+            
+            new Chart(document.getElementById("categoryExpenseChart"), {
+                type: 'pie',
+                data: categoryData,
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'right',
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.label || '';
+                                    if (label) {
+                                        label += ': ';
+                                    }
+                                    label += '₹' + context.raw.toFixed(2);
+                                    return label;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        {% endif %}
+        
+        {% if tag_expenses %}
+            // Tag Expense Chart
+            const tagData = {
+                labels: [
+                    {% for tag in tag_expenses %}
+                        "{{ tag.tag|title }}",
+                    {% endfor %}
+                ],
+                datasets: [{
+                    data: [
+                        {% for tag in tag_expenses %}
+                            {{ tag.total }},
+                        {% endfor %}
+                    ],
+                    backgroundColor: [
+                        '#1cc88a', // essential
+                        '#f6c23e', // luxury
+                        '#36b9cc', // investment
+                        '#e74a3b', // emergency
+                        '#858796'  // other
+                    ],
+                }]
+            };
+            
+            new Chart(document.getElementById("tagExpenseChart"), {
+                type: 'doughnut',
+                data: tagData,
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    cutout: '70%',
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.label || '';
+                                    if (label) {
+                                        label += ': ';
+                                    }
+                                    const percentage = ((context.raw / {{ total_expense|default:1 }}) * 100).toFixed(1);
+                                    label += '$' + context.raw.toFixed(2) + ' (' + percentage + '%)';
+                                    return label;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        {% endif %}
+        
+        {% if daily_expenses %}
+            // Daily Expense Chart
+            const dailyData = {
+                labels: [
+                    {% for expense in daily_expenses %}
+                        "{{ expense.day|date:'M d' }}",
+                    {% endfor %}
+                ],
+                datasets: [{
+                    label: 'Daily Expenses',
+                    data: [
+                        {% for expense in daily_expenses %}
+                            {{ expense.total }},
+                        {% endfor %}
+                    ],
+                    backgroundColor: 'rgba(78, 115, 223, 0.2)',
+                    borderColor: 'rgba(78, 115, 223, 1)',
+                    borderWidth: 2,
+                    pointBackgroundColor: 'rgba(78, 115, 223, 1)',
+                    pointBorderColor: '#fff',
+                    pointHoverRadius: 5,
+                    pointHoverBackgroundColor: 'rgba(78, 115, 223, 1)',
+                    pointHoverBorderColor: '#fff',
+                    lineTension: 0.3
+                }]
+            };
+            
+            new Chart(document.getElementById("dailyExpenseChart"), {
+                type: 'line',
+                data: dailyData,
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function(value) {
+                                    return '$' + value;
+                                }
+                            }
+                        }
+                    },
+                    plugins: {
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.dataset.label || '';
+                                    if (label) {
+                                        label += ': ';
+                                    }
+                                    label += '$' + context.parsed.y.toFixed(2);
+                                    return label;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        {% endif %}
+    });
+</script>
+{% endblock %}

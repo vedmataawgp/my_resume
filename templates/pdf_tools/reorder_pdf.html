@@ -1,0 +1,311 @@
+{% extends 'base.html' %}
+
+{% block title %}Reorder PDF Pages - PDFMate{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-10">
+            <div class="card shadow">
+                <div class="card-header bg-info text-white">
+                    <h2 class="mb-0">Reorder PDF Pages</h2>
+                </div>
+                <div class="card-body">
+                    <div class="text-center mb-4">
+                        <p class="lead">Upload a PDF and rearrange its pages by dragging and dropping them into the desired order.</p>
+                    </div>
+                    
+                    <div id="upload-section"{% if thumbnails %} style="display: none;"{% endif %}>
+                        {% if error %}
+                        <div class="alert alert-danger mb-4">
+                            <i class="fas fa-exclamation-triangle"></i> {{ error }}
+                        </div>
+                        {% endif %}
+                        
+                        <form method="post" enctype="multipart/form-data" id="upload-pdf-form">
+                            {% csrf_token %}
+                            
+                            <div class="mb-4">
+                                <div class="drop-area" id="drop-area-pdf">
+                                    <div class="drop-area-content">
+                                        <i class="fas fa-file-pdf fa-3x mb-3"></i>
+                                        <p>Drag & drop your PDF file here or click to browse</p>
+                                        {{ form.file }}
+                                    </div>
+                                </div>
+                                <div id="file-list" class="mt-3"></div>
+                            </div>
+                            
+                            <div class="d-grid gap-2">
+                                <button type="submit" id="upload-btn" class="btn btn-info btn-lg">Upload and Prepare for Reordering</button>
+                            </div>
+                        </form>
+                    </div>
+                    
+                    <div id="reorder-section" {% if not thumbnails %}style="display: none;"{% endif %}">
+                        <div class="alert alert-info mb-4">
+                            <i class="fas fa-info-circle"></i> Drag and drop the pages below to reorder them. The changes will be saved when you click the "Save Reordered PDF" button.
+                        </div>
+                        
+                        <div id="pdf-pages-container" class="row mb-4 sortable-container">
+                            {% if thumbnails %}
+                                {% for page in thumbnails %}
+                                <div class="col-md-3 col-sm-6 pdf-page-item" data-page="{{ page.number }}">
+                                    <div class="card">
+                                        <img src="{{ page.url }}" class="card-img-top" alt="Page {{ page.number }}">
+                                        <div class="card-body text-center">
+                                            <p class="card-text">Page {{ page.number }}</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            {% else %}
+                                <!-- PDF pages will be loaded here dynamically -->
+                            {% endif %}
+                        </div>
+                        
+                        <form method="post" id="process-form">
+                            {% csrf_token %}
+                            <input type="hidden" name="process" value="true">
+                            <input type="hidden" name="filename" id="filename-input" value="{% if filename %}{{ filename }}{% endif %}">
+                            <input type="hidden" name="page_order" id="page-order-input">
+                            
+                            <div class="d-grid gap-2">
+                                <button type="submit" class="btn btn-success btn-lg">Save Reordered PDF</button>
+                                <button type="button" id="cancel-btn" class="btn btn-outline-secondary">Cancel and Upload a Different PDF</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                <div class="card-footer bg-light">
+                    <div class="row">
+                        <div class="col-md-4 text-center">
+                            <i class="fas fa-eye fa-2x mb-2 text-info"></i>
+                            <p class="mb-0">Page Preview</p>
+                        </div>
+                        <div class="col-md-4 text-center">
+                            <i class="fas fa-arrows-alt fa-2x mb-2 text-info"></i>
+                            <p class="mb-0">Drag & Drop</p>
+                        </div>
+                        <div class="col-md-4 text-center">
+                            <i class="fas fa-save fa-2x mb-2 text-info"></i>
+                            <p class="mb-0">Save Changes</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="text-center mt-4">
+                <a href="{% url 'home' %}" class="btn btn-outline-secondary">Back to Home</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block head_extra %}
+<style>
+    .sortable-container {
+        min-height: 150px;
+    }
+    .pdf-page-item {
+        cursor: move;
+        margin-bottom: 20px;
+    }
+    .pdf-page-item .card {
+        transition: all 0.2s ease;
+    }
+    .pdf-page-item .card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+    }
+    .pdf-page-item .card-img-top {
+        max-height: 200px;
+        object-fit: contain;
+        background-color: #f8f9fa;
+    }
+    .sortable-placeholder {
+        border: 2px dashed #ccc;
+        background-color: #f9f9f9;
+        height: 250px;
+        margin-bottom: 20px;
+    }
+</style>
+{% endblock %}
+
+{% block scripts %}
+<!-- Include jQuery and jQuery UI for drag and drop functionality -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://code.jquery.com/ui/1.13.1/jquery-ui.min.js"></script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initialize drag and drop for PDF file
+        const fileUpload = document.getElementById('id_file');
+        const dropArea = document.getElementById('drop-area-pdf');
+        const fileList = document.getElementById('file-list');
+        const uploadBtn = document.getElementById('upload-btn');
+        const uploadSection = document.getElementById('upload-section');
+        const reorderSection = document.getElementById('reorder-section');
+        const cancelBtn = document.getElementById('cancel-btn');
+        const pdfPagesContainer = document.getElementById('pdf-pages-container');
+        const filenameInput = document.getElementById('filename-input');
+        const pageOrderInput = document.getElementById('page-order-input');
+        
+        // Initialize sortable immediately if we have thumbnails displayed
+        if (pdfPagesContainer && pdfPagesContainer.querySelectorAll('.pdf-page-item').length > 0) {
+            console.log('Found thumbnails on page load, initializing sortable');
+            initSortable();
+            updatePageOrder();
+        }
+        
+        // Initialize drag and drop for file upload
+        initDragAndDrop(dropArea, fileUpload, function(files) {
+            if (validateFiles(files, '.pdf')) {
+                updateFileList(files, fileList);
+                return true;
+            }
+            return false;
+        });
+        
+        // Update file list when file is selected
+        fileUpload.addEventListener('change', function() {
+            if (validateFiles(this.files, '.pdf')) {
+                updateFileList(this.files, fileList);
+            } else {
+                this.value = '';
+                fileList.innerHTML = '';
+            }
+        });
+        
+        // Function to display selected file
+        function updateFileList(files, container) {
+            container.innerHTML = '';
+            
+            if (files.length > 0) {
+                const fileInfo = document.createElement('div');
+                fileInfo.className = 'file-info p-2 border rounded';
+                
+                const file = files[0];
+                fileInfo.innerHTML = `
+                    <div class="d-flex align-items-center">
+                        <i class="fas fa-file-pdf text-danger me-2"></i>
+                        <div>
+                            <div class="fw-bold">${file.name}</div>
+                            <div class="small text-muted">${formatFileSize(file.size)}</div>
+                        </div>
+                    </div>
+                `;
+                
+                container.appendChild(fileInfo);
+            }
+        }
+        
+        // Add logging for debugging
+        function showDebug(message, obj = null) {
+            if (obj) {
+                console.log('DEBUG:', message, obj);
+            } else {
+                console.log('DEBUG:', message);
+            }
+        }
+
+        // Simple error display function
+        function showError(message) {
+            alert(message);
+            console.error('ERROR:', message);
+        }
+        
+        // Convert upload button to submit the form directly instead of using iframe or AJAX
+        uploadBtn.addEventListener('click', function() {
+            showDebug('Upload button clicked');
+            
+            if (fileUpload.files.length === 0) {
+                showError('Please select a PDF file first.');
+                return;
+            }
+            
+            showDebug('File selected: ' + fileUpload.files[0].name);
+            
+            // Show loading indicator
+            uploadBtn.disabled = true;
+            uploadBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Uploading...';
+            
+            // Just submit the form directly - the backend will handle the response
+            const form = document.getElementById('upload-pdf-form');
+            form.submit();
+        });
+        
+        // Load PDF pages for reordering
+        function loadPdfPages(thumbnails) {
+            pdfPagesContainer.innerHTML = '';
+            
+            thumbnails.forEach(page => {
+                const pageCol = document.createElement('div');
+                pageCol.className = 'col-md-3 col-sm-6 pdf-page-item';
+                pageCol.setAttribute('data-page', page.number);
+                
+                pageCol.innerHTML = `
+                    <div class="card">
+                        <img src="${page.url}" class="card-img-top" alt="Page ${page.number}">
+                        <div class="card-body text-center">
+                            <p class="card-text">Page ${page.number}</p>
+                        </div>
+                    </div>
+                `;
+                
+                pdfPagesContainer.appendChild(pageCol);
+            });
+        }
+        
+        // Initialize jQuery UI sortable
+        function initSortable() {
+            $(pdfPagesContainer).sortable({
+                placeholder: 'col-md-3 col-sm-6 sortable-placeholder',
+                cursor: 'move',
+                update: function(event, ui) {
+                    // Update hidden input with current page order
+                    updatePageOrder();
+                }
+            });
+        }
+        
+        // Update hidden input with current page order
+        function updatePageOrder() {
+            const pageOrder = [];
+            const pageItems = pdfPagesContainer.querySelectorAll('.pdf-page-item');
+            
+            pageItems.forEach(item => {
+                pageOrder.push(item.getAttribute('data-page'));
+            });
+            
+            // Update hidden input
+            pageOrderInput.value = JSON.stringify(pageOrder);
+        }
+        
+        // Handle cancel button click
+        cancelBtn.addEventListener('click', function() {
+            // Switch back to upload view
+            reorderSection.style.display = 'none';
+            uploadSection.style.display = 'block';
+            
+            // Clear the file input
+            fileUpload.value = '';
+            fileList.innerHTML = '';
+            
+            // Clear the pages container
+            pdfPagesContainer.innerHTML = '';
+        });
+        
+        // Handle form submission for processing reordered PDF
+        document.getElementById('process-form').addEventListener('submit', function(e) {
+            // Ensure page order is updated before submitting
+            updatePageOrder();
+            
+            if (!pageOrderInput.value) {
+                e.preventDefault();
+                showError('An error occurred. No page order information available.');
+            }
+        });
+    });
+</script>
+{% endblock %}
