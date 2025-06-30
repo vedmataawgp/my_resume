@@ -69,17 +69,13 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'my_resume.wsgi.application'
 
-# Database
 DATABASES = {
     'default': dj_database_url.config(
         default='sqlite:///db.sqlite3',
-        conn_max_age=600,
-        ssl_require=True
+        conn_max_age=600
     )
 }
 
-if not DATABASES['default'].get('ENGINE'):
-    raise Exception("Database engine not found. Please check your DATABASE_URL environment variable.")
 
 # Password validation
 AUTH_PASSWORD_VALIDATORS = [
